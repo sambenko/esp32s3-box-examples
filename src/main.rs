@@ -1,39 +1,43 @@
 #![no_std]
 #![no_main]
 
-extern crate alloc;
-use esp32s3_hal::{clock::ClockControl, pac::Peripherals, prelude::*, timer::TimerGroup, Rtc};
+use display_interface_spi::SPIInterfaceNoCS;
+
+use embedded_graphics::{
+    prelude::RgbColor,
+    mono_font::{
+        ascii::FONT_10X20,
+        MonoTextStyleBuilder,
+    },
+    prelude::Point,
+    text::{Alignment, Text},
+    Drawable,
+};
+
+use esp32s3_hal::{
+    clock::ClockControl,
+    pac::Peripherals,
+    prelude::*,
+    spi,
+    timer::TimerGroup,
+    Rtc,
+    IO,
+    Delay,
+};
+
+use mipidsi::DisplayOptions;
+
+#[allow(unused_imports)]
 use esp_backtrace as _;
-use esp_println::println;
 
-#[global_allocator]
-static ALLOCATOR: esp_alloc::EspHeap = esp_alloc::EspHeap::empty();
+use xtensa_lx_rt::entry;
 
-fn init_heap() {
-    const HEAP_SIZE: usize = 32 * 1024;
-
-    extern "C" {
-        static mut _heap_start: u32;
-        static mut _heap_end: u32;
-    }
-
-    unsafe {
-        let heap_start = &_heap_start as *const _ as usize;
-        let heap_end = &_heap_end as *const _ as usize;
-        assert!(
-            heap_end - heap_start > HEAP_SIZE,
-            "Not enough available heap memory."
-        );
-        ALLOCATOR.init(heap_start as *mut u8, HEAP_SIZE);
-    }
-}
-#[xtensa_lx_rt::entry]
+#[entry]
 fn main() -> ! {
     let peripherals = Peripherals::take().unwrap();
-    let system = peripherals.SYSTEM.split();
+    let mut system = peripherals.SYSTEM.split();
     let clocks = ClockControl::boot_defaults(system.clock_control).freeze();
 
-    // Disable the RTC and TIMG watchdog timers
     let mut rtc = Rtc::new(peripherals.RTC_CNTL);
     let timer_group0 = TimerGroup::new(peripherals.TIMG0, &clocks);
     let mut wdt0 = timer_group0.wdt;
@@ -41,10 +45,50 @@ fn main() -> ! {
     let mut wdt1 = timer_group1.wdt;
 
     rtc.rwdt.disable();
+
     wdt0.disable();
     wdt1.disable();
 
-    println!("Hello World!");
+    let mut delay = Delay::new(&clocks);
+
+    let io = IO::new(peripherals.GPIO, peripherals.IO_MUX);
+
+    let sclk = io.pins.gpio7;
+    let mosi = io.pins.gpio6;
+
+    let spi = spi::Spi::new_no_cs_no_miso(
+        peripherals.SPI2,
+        sclk,
+        mosi,
+        4u32.MHz(),
+        spi::SpiMode::Mode0,
+        &mut system.peripheral_clock_control,
+        &clocks,
+    );
+
+    let mut backlight = io.pins.gpio45.into_push_pull_output();
+    backlight.set_high().unwrap();
+
+    let reset = io.pins.gpio48.into_push_pull_output();
+
+    let di = SPIInterfaceNoCS::new(spi, io.pins.gpio4.into_push_pull_output());
+
+    let display_options = DisplayOptions {
+        orientation: mipidsi::Orientation::PortraitInverted(false),
+        ..Default::default()
+    };
+
+    let mut display = mipidsi::Display::ili9342c_rgb565(di, core::prelude::v1::Some(reset), display_options);
+    display.init(&mut delay).unwrap();
+
+    let espressif_style = MonoTextStyleBuilder::new()
+        .font(&FONT_10X20)
+        .text_color(RgbColor::BLACK)
+        .build();
+
+    Text::with_alignment("HELLO WORLD!", Point::new(160, 120), espressif_style,  Alignment::Center)
+        .draw(&mut display)
+        .unwrap();  
 
     loop {}
 }
