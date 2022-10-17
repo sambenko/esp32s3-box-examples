@@ -25,6 +25,8 @@ use esp32s3_hal::{
     Delay,
 };
 
+use esp_println::println;
+
 use mipidsi::DisplayOptions;
 
 #[allow(unused_imports)]
@@ -88,7 +90,9 @@ fn main() -> ! {
 
     Text::with_alignment("HELLO WORLD!", Point::new(160, 120), espressif_style,  Alignment::Center)
         .draw(&mut display)
-        .unwrap();  
+        .unwrap();
+    
+    println!("Hello World!");
 
     loop {}
 }
