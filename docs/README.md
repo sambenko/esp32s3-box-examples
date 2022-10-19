@@ -1,9 +1,10 @@
+<a name="readme-top"></a>
 
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
   <a href="https://github.com/sambenko/esp32s3-box-examples">
-    <img src="images/esp32s3box.png" alt="Logo" width="120" height="120">
+    <img src="images/esp32s3box.png" alt="Logo" width="200" height="200">
   </a>
 
 <h3 align="center">ESP32S3-BOX Examples</h3>
@@ -15,23 +16,20 @@
 
 ## Usage
 
+* hello world
+
 ```sh
    cargo espflash --release --monitor
 ```
-produces
+![alt text](https://github.com/sambenko/esp32s3-box-examples/docs/images/hello_world.jpg?raw=true)
 
-<div align="center">
-  <a href="https://github.com/github_username/repo_name">
-    <img src="images/hello_world.jpg" alt="Example" width="150" height="150">
-  </a>
-</div>
 
-and to run my first animation example:
+* checker animation
+
 ```sh
    cargo espflash --release --monitor --example checker_animation
 ```
-<div align="center">
-  <a href="https://github.com/github_username/repo_name">
-    <img src="images/check_animation.jpg" alt="Example" width="150" height="150">
-  </a>
-</div>
+
+![alt text](https://github.com/sambenko/esp32s3-box-examples/docs/images/check_animation.jpg?raw=true)
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
