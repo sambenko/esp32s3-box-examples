@@ -21,7 +21,7 @@
 ```sh
    cargo espflash --release --monitor
 ```
-![alt text](https://github.com/sambenko/esp32s3-box-examples/docs/images/hello_world.jpg?raw=true)
+![alt text](https://github.com/sambenko/esp32s3-box-examples/blob/main/docs/images/hello_world.jpg?raw=true)
 
 
 * checker animation
@@ -30,6 +30,6 @@
    cargo espflash --release --monitor --example checker_animation
 ```
 
-![alt text](https://github.com/sambenko/esp32s3-box-examples/docs/images/check_animation.jpg?raw=true)
+![alt text](https://github.com/sambenko/esp32s3-box-examples/blob/main/docs/images/check_animation.jpg?raw=true)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
