@@ -43,4 +43,12 @@
   </a>
 </div>
 
+* squares animation
+
+```sh
+   cargo espflash --release --monitor --example squares
+```
+
+No spoiler image this time.
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
