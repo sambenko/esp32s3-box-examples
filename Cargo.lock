@@ -334,6 +334,7 @@ dependencies = [
  "esp-backtrace",
  "esp-println 0.3.1",
  "esp32s3-hal",
+ "libm",
  "mipidsi",
  "xtensa-lx-rt",
 ]
@@ -410,6 +411,12 @@ name = "lazy_static"
 version = "1.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e2abad23fbc42b3700f2f279844dc832adb2b2eb069b2df918f455c4e18cc646"
+
+[[package]]
+name = "libm"
+version = "0.2.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "292a948cd991e376cf75541fe5b97a1081d713c618b4f1b9500f8844e49eb565"
 
 [[package]]
 name = "linked_list_allocator"
