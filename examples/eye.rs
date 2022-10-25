@@ -94,13 +94,13 @@ fn main() -> ! {
     let mut y;
     for i in 0..13200 {
         vt = i as f64 / (20.0 * PI as f64);
-        if (i < 8000) {
+        if i < 8000 {
             x = (vt - 50.0) * sin(vt);
         } else {
             x = (vt + 20.0) * sin(vt);
         }
         y = (vt - 50.0) * cos(vt);
-        if (i < 8000) {
+        if i < 8000 {
             Text::with_alignment("'", Point::new((x + 160.0) as i32, (y + 125.0) as i32), default_style,  Alignment::Center)
                 .draw(&mut display)
                 .unwrap();
