@@ -39,9 +39,12 @@
 
 <div align="center">
   <a href="https://github.com/sambenko/esp32s3-box-examples">
-    <img src="images/check_animation.jpg" alt="Animation" width="500" height="500">
+    <img src="images/esp_demo.jpg" alt="ESP demo" width="500" height="500">
   </a>
 </div>
+
+<br/><br/>
+<br/><br/>
 
 * squares animation
 
@@ -49,6 +52,25 @@
    cargo espflash --release --monitor --example squares
 ```
 
-No spoiler image this time.
+<div align="center">
+  <a href="https://github.com/sambenko/esp32s3-box-examples">
+    <img src="images/squares.jpg" alt="Square animation" width="500" height="500">
+  </a>
+</div>
+
+<br/><br/>
+<br/><br/>
+
+* eye (esp art no.1)
+
+```sh
+   cargo espflash --release --monitor --example eye
+```
+
+div align="center">
+  <a href="https://github.com/sambenko/esp32s3-box-examples">
+    <img src="images/eye.jpg" alt="Eye drawing" width="500" height="500">
+  </a>
+</div>
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
