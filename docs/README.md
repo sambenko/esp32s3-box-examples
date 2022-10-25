@@ -31,10 +31,10 @@
 <br/><br/>
 <br/><br/>
 
-* checker animation
+* esp demo animation
 
 ```sh
-   cargo espflash --release --monitor --example checker_animation
+   cargo espflash --release --monitor --example esp_demo
 ```
 
 <div align="center">
@@ -67,7 +67,7 @@
    cargo espflash --release --monitor --example eye
 ```
 
-div align="center">
+<div align="center">
   <a href="https://github.com/sambenko/esp32s3-box-examples">
     <img src="images/eye.jpg" alt="Eye drawing" width="500" height="500">
   </a>
