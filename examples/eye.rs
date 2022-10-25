@@ -92,7 +92,7 @@ fn main() -> ! {
     let mut vt;
     let mut x;
     let mut y;
-    for i in 0..16000 {
+    for i in 0..13200 {
         vt = i as f64 / (20.0 * PI as f64);
         if (i < 8000) {
             x = (vt - 50.0) * sin(vt);
