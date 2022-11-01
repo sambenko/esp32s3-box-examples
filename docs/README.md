@@ -34,7 +34,7 @@
 * esp demo animation
 
 ```sh
-   cargo espflash --release --monitor --example esp_demo
+   cargo espflash --release --example esp_demo
 ```
 
 <div align="center">
@@ -49,7 +49,7 @@
 * squares animation
 
 ```sh
-   cargo espflash --release --monitor --example squares
+   cargo espflash --release --example squares
 ```
 
 <div align="center">
@@ -64,7 +64,7 @@
 * eye (esp art no.1)
 
 ```sh
-   cargo espflash --release --monitor --example eye
+   cargo espflash --release --example eye
 ```
 
 <div align="center">
@@ -79,12 +79,27 @@
 * lollipop guy (esp art no.2)
 
 ```sh
-   cargo espflash --release --monitor --example lollipop_guy
+   cargo espflash --release --example lollipop_guy
 ```
 
 <div align="center">
   <a href="https://github.com/sambenko/esp32s3-box-examples">
     <img src="images/lollipop_guy.jpg" alt="Lollipop guy" width="400" height="400">
+  </a>
+</div>
+
+<br/><br/>
+<br/><br/>
+
+* ESP garden (esp art no.3)
+
+```sh
+   cargo espflash --release --example garden
+```
+
+<div align="center">
+  <a href="https://github.com/sambenko/esp32s3-box-examples">
+    <img src="images/garden.jpg" alt="Esp garden" width="400" height="400">
   </a>
 </div>
 
