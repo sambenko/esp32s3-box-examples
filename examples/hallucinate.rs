@@ -27,9 +27,6 @@ use esp32s3_hal::{
 
 use mipidsi::DisplayOptions;
 
-use core::f32::consts::PI;
-use libm::{sin, cos};
-
 #[allow(unused_imports)]
 use esp_backtrace as _;
 
@@ -38,7 +35,7 @@ use xtensa_lx_rt::entry;
 #[entry]
 fn main() -> ! {
     let peripherals = Peripherals::take().unwrap();
-    let mut system = peripherals.SYSTEM.split();
+    let mut system = peripherals.SsYSTEM.split();
     let clocks = ClockControl::boot_defaults(system.clock_control).freeze();
 
     let mut rtc = Rtc::new(peripherals.RTC_CNTL);
@@ -88,3 +85,6 @@ fn main() -> ! {
         .font(&FONT_10X20)
         .text_color(RgbColor::BLACK)
         .build();
+
+    loop{}
+}
