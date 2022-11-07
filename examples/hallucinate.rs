@@ -86,9 +86,19 @@ fn main() -> ! {
         .text_color(RgbColor::BLACK)
         .build();
 
-    Text::with_alignment("Hallucinate", Point::new(160, 120), default_style,  Alignment::Center)
-        .draw(&mut display)
-        .unwrap();
+    let mut y;
 
+    for a in (1..516).step_by(8) {
+        for x in (1..400).step_by(45) {
+            y = a + (a / a + 11) * x;
+            Text::with_alignment("o", Point::new(x, y), default_style,  Alignment::Center)
+                .draw(&mut display)
+                .unwrap();
+            Text::with_alignment("o", Point::new(y, x + 8), default_style,  Alignment::Center)
+                .draw(&mut display)
+                .unwrap();
+            delay.delay_ms(10u32);
+        }
+    }
     loop{}
 }
