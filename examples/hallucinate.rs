@@ -35,7 +35,7 @@ use xtensa_lx_rt::entry;
 #[entry]
 fn main() -> ! {
     let peripherals = Peripherals::take().unwrap();
-    let mut system = peripherals.SsYSTEM.split();
+    let mut system = peripherals.SYSTEM.split();
     let clocks = ClockControl::boot_defaults(system.clock_control).freeze();
 
     let mut rtc = Rtc::new(peripherals.RTC_CNTL);
@@ -85,6 +85,10 @@ fn main() -> ! {
         .font(&FONT_10X20)
         .text_color(RgbColor::BLACK)
         .build();
+
+    Text::with_alignment("Hallucinate", Point::new(160, 120), default_style,  Alignment::Center)
+        .draw(&mut display)
+        .unwrap();
 
     loop{}
 }
