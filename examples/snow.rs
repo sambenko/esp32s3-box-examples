@@ -89,27 +89,144 @@ fn main() -> ! {
         .text_color(RgbColor::BLACK)
         .build();
 
+    let espressif_style = MonoTextStyleBuilder::new()   
+        .font(&FONT_10X20)
+        .text_color(RgbColor::CYAN)
+        .build();
+
+    //letter E
+
+    for position_y in 94..154 {
+        for position_x in 56..66 {
+            Text::with_alignment("O", Point::new(position_x, position_y), espressif_style,  Alignment::Center)
+            .draw(&mut display)
+            .unwrap();
+        }
+    }
+
+    for y in (94..154).step_by(28) {
+        for position_y in y..y+4 {
+            for position_x in 66..116 {
+                Text::with_alignment("O", Point::new(position_x, position_y), espressif_style,  Alignment::Center)
+                .draw(&mut display)
+                .unwrap();
+            }
+        }
+    }
+
+    //letter S
+
+    for y in (94..154).step_by(28) {
+        for position_y in y..y+5 {
+            for position_x in 131..191 {
+                Text::with_alignment("O", Point::new(position_x, position_y), espressif_style,  Alignment::Center)
+                .draw(&mut display)
+                .unwrap();
+            }
+        }
+    }
+
+    for position_y in 106..113 {
+        for position_x in 131..141 {
+            Text::with_alignment("O", Point::new(position_x, position_y), espressif_style,  Alignment::Center)
+            .draw(&mut display)
+            .unwrap();
+        }
+    }
+
+    for position_y in 136..143 {
+        for position_x in 181..191 {
+            Text::with_alignment("O", Point::new(position_x, position_y), espressif_style,  Alignment::Center)
+            .draw(&mut display)
+            .unwrap();
+        }
+    }
+
+    //letter P
+
+    for position_y in 94..154 {
+        for position_x in 206..216 {
+            Text::with_alignment("O", Point::new(position_x, position_y), espressif_style,  Alignment::Center)
+            .draw(&mut display)
+            .unwrap();
+        }
+    }
+
+    for y in (94..126).step_by(28) {
+        for position_y in y..y+3 {
+            for position_x in 216..266 {
+                Text::with_alignment("O", Point::new(position_x, position_y), espressif_style,  Alignment::Center)
+                .draw(&mut display)
+                .unwrap();
+            }
+        }
+    }
+
+    for position_y in 106..113 {
+        for position_x in 256..266 {
+            Text::with_alignment("O", Point::new(position_x, position_y), espressif_style,  Alignment::Center)
+            .draw(&mut display)
+            .unwrap();
+        }
+    }
+
+    //christmas hat
+
     let n = 6.0;
     let d = 71.0;    
     let mut a;
     let mut r;
     let mut x;
     let mut y;
-
-    let mut x_array: [f64; 11] = [10.0, 40.0, 70.0, 100.0, 130.0, 160.0, 190.0, 220.0, 250.0, 280.0, 310.0];
-
-    for i in 0..11 {
-        for t in 0..361 {
-            a = t as f64 * d * (PI as f64 / 18.0);
-            r = 10.0 * sin(n * a);
-            x = r * cos(a);
-            y = r * sin(a);
     
-            Text::with_alignment("o", Point::new((x +  x_array[i]) as i32, (y + 20.0) as i32), default_style,  Alignment::Center)
-                .draw(&mut display)
-                .unwrap();
-        }
+    for t in 0..361 {
+        a = t as f64 * d * (PI as f64 / 18.0);
+        r = 10.0 * sin(n * a);
+        x = r * cos(a);
+        y = r * sin(a);
+
+        Text::with_alignment("o", Point::new((x + 161.0) as i32, (y + 22.0) as i32), default_style,  Alignment::Center)
+            .draw(&mut display)
+            .unwrap();
     }
+
+    let mut i = 217;
+    let mut j = 86;
+    while(i > 125 && j > 35) {
+        Text::with_alignment("-", Point::new(i, j), default_style,  Alignment::Center)
+            .draw(&mut display)
+            .unwrap();
+        i = i - 1;
+        j = j - 1;
+    }
+
+    i = 105;
+    j = 86;
+    while(i < 199 && j > 35) {
+        Text::with_alignment("-", Point::new(i, j), default_style,  Alignment::Center)
+            .draw(&mut display)
+            .unwrap();
+        i = i + 1;
+        j = j - 1;
+    }
+
+    for k in 105..217 {
+        Text::with_alignment("'", Point::new(k, 89), default_style,  Alignment::Center)
+            .draw(&mut display)
+            .unwrap();
+    }
+
+    for k in 114..208 {
+        Text::with_alignment("'", Point::new(k, 79), default_style,  Alignment::Center)
+            .draw(&mut display)
+            .unwrap();
+    }
+
+
+
+    
+
+
     
     loop {}
 }
