@@ -15,9 +15,8 @@ embedded-graphics = "0.7"
 mipidsi = "0.4"
 display-interface-spi = "0.4"
 
-#hallucination dependencies
+#snow dependencies
 libm = "0.2.5"
-
 
 [features]
 default = ["rt"]

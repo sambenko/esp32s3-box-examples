@@ -35,8 +35,6 @@ use esp_backtrace as _;
 
 use xtensa_lx_rt::entry;
 
-fn snowflake() {}
-
 #[entry]
 fn main() -> ! {
     let peripherals = Peripherals::take().unwrap();
@@ -91,22 +89,26 @@ fn main() -> ! {
         .text_color(RgbColor::BLACK)
         .build();
 
-    let mut n = 6.0;
-    let mut d = 71.0;    
+    let n = 6.0;
+    let d = 71.0;    
     let mut a;
     let mut r;
     let mut x;
     let mut y;
 
-    for t in 0..361 {
-        a = t as f64 * d * (PI as f64 / 18.0);
-        r = 12.0 * sin(n * a);
-        x = r * cos(a);
-        y = r * sin(a);
+    let mut x_array: [f64; 11] = [10.0, 40.0, 70.0, 100.0, 130.0, 160.0, 190.0, 220.0, 250.0, 280.0, 310.0];
 
-        Text::with_alignment("o", Point::new((x + 35.0) as i32, (y + 180.0) as i32), default_style,  Alignment::Center)
-            .draw(&mut display)
-            .unwrap();
+    for i in 0..11 {
+        for t in 0..361 {
+            a = t as f64 * d * (PI as f64 / 18.0);
+            r = 10.0 * sin(n * a);
+            x = r * cos(a);
+            y = r * sin(a);
+    
+            Text::with_alignment("o", Point::new((x +  x_array[i]) as i32, (y + 20.0) as i32), default_style,  Alignment::Center)
+                .draw(&mut display)
+                .unwrap();
+        }
     }
     
     loop {}
