@@ -4,19 +4,19 @@
 use display_interface_spi::SPIInterfaceNoCS;
 
 use embedded_graphics::{
-    prelude::RgbColor,
+    prelude::{RgbColor, Point, Primitive, Size},
     mono_font::{
         ascii::FONT_10X20,
         MonoTextStyleBuilder, MonoTextStyle,
     },
-    prelude::Point,
+    primitives::{Triangle, Line, Rectangle, RoundedRectangle, PrimitiveStyle, PrimitiveStyleBuilder, StrokeAlignment}, 
     text::{Alignment, Text},
     Drawable,
 };
 
 use esp32s3_hal::{
     clock::ClockControl,
-    pac::Peripherals,
+    pac::{Peripherals, debug_assist::core_1_area_pc::R},
     prelude::*,
     spi,
     timer::TimerGroup,
@@ -86,7 +86,7 @@ fn main() -> ! {
 
     let default_style = MonoTextStyleBuilder::new()
         .font(&FONT_10X20)
-        .text_color(RgbColor::BLACK)
+        .text_color(RgbColor::WHITE)
         .build();
 
     let espressif_style = MonoTextStyleBuilder::new()   
@@ -190,43 +190,36 @@ fn main() -> ! {
             .unwrap();
     }
 
-    let mut i = 217;
-    let mut j = 86;
-    while(i > 125 && j > 35) {
-        Text::with_alignment("-", Point::new(i, j), default_style,  Alignment::Center)
-            .draw(&mut display)
-            .unwrap();
-        i = i - 1;
-        j = j - 1;
-    }
+    let hat_style = PrimitiveStyleBuilder::new()
+        .stroke_color(RgbColor::BLACK)
+        .stroke_width(4)
+        .stroke_alignment(StrokeAlignment::Inside)
+        .fill_color(RgbColor::RED)
+        .build();
+    
+    let cushion_style = PrimitiveStyleBuilder::new()
+        .stroke_color(RgbColor::BLACK)
+        .stroke_width(4)
+        .fill_color(RgbColor::WHITE)
+        .build();
 
-    i = 105;
-    j = 86;
-    while(i < 199 && j > 35) {
-        Text::with_alignment("-", Point::new(i, j), default_style,  Alignment::Center)
-            .draw(&mut display)
-            .unwrap();
-        i = i + 1;
-        j = j - 1;
-    }
+    Triangle::new(
+        Point::new(161, 32),
+        Point::new(128, 64),
+        Point::new(195, 64),
+    )
+    .into_styled(hat_style)
+    .draw(&mut display)
+    .unwrap();
 
-    for k in 105..217 {
-        Text::with_alignment("'", Point::new(k, 89), default_style,  Alignment::Center)
-            .draw(&mut display)
-            .unwrap();
-    }
-
-    for k in 114..208 {
-        Text::with_alignment("'", Point::new(k, 79), default_style,  Alignment::Center)
-            .draw(&mut display)
-            .unwrap();
-    }
-
-
-
+    RoundedRectangle::with_equal_corners(
+        Rectangle::new(Point::new(122, 64), Size::new(80, 20)),
+        Size::new(10, 10),
+    )
+    .into_styled(cushion_style)
+    .draw(&mut display)
+    .unwrap();
     
 
-
-    
     loop {}
 }
