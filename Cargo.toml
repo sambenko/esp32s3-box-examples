@@ -17,6 +17,7 @@ display-interface-spi = "0.4"
 
 #snow dependencies
 libm = "0.2.5"
+tinybmp = "0.4.0"
 
 [features]
 default = ["rt"]
