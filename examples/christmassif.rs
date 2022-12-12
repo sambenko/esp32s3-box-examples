@@ -5,6 +5,8 @@ use display_interface_spi::SPIInterfaceNoCS;
 
 use embedded_graphics::{
     prelude::{RgbColor, Point, Primitive, Size},
+    image::Image,
+    pixelcolor::Rgb565,
     mono_font::{
         ascii::FONT_10X20,
         MonoTextStyleBuilder, MonoTextStyle,
@@ -13,6 +15,8 @@ use embedded_graphics::{
     text::{Alignment, Text},
     Drawable,
 };
+
+use tinybmp::Bmp;
 
 use esp32s3_hal::{
     clock::ClockControl,
@@ -88,88 +92,7 @@ fn main() -> ! {
         .font(&FONT_10X20)
         .text_color(RgbColor::WHITE)
         .build();
-
-    let espressif_style = MonoTextStyleBuilder::new()   
-        .font(&FONT_10X20)
-        .text_color(RgbColor::CYAN)
-        .build();
-
-    //letter E
-
-    for position_y in 94..154 {
-        for position_x in 56..66 {
-            Text::with_alignment("O", Point::new(position_x, position_y), espressif_style,  Alignment::Center)
-            .draw(&mut display)
-            .unwrap();
-        }
-    }
-
-    for y in (94..154).step_by(28) {
-        for position_y in y..y+4 {
-            for position_x in 66..116 {
-                Text::with_alignment("O", Point::new(position_x, position_y), espressif_style,  Alignment::Center)
-                .draw(&mut display)
-                .unwrap();
-            }
-        }
-    }
-
-    //letter S
-
-    for y in (94..154).step_by(28) {
-        for position_y in y..y+5 {
-            for position_x in 131..191 {
-                Text::with_alignment("O", Point::new(position_x, position_y), espressif_style,  Alignment::Center)
-                .draw(&mut display)
-                .unwrap();
-            }
-        }
-    }
-
-    for position_y in 106..113 {
-        for position_x in 131..141 {
-            Text::with_alignment("O", Point::new(position_x, position_y), espressif_style,  Alignment::Center)
-            .draw(&mut display)
-            .unwrap();
-        }
-    }
-
-    for position_y in 136..143 {
-        for position_x in 181..191 {
-            Text::with_alignment("O", Point::new(position_x, position_y), espressif_style,  Alignment::Center)
-            .draw(&mut display)
-            .unwrap();
-        }
-    }
-
-    //letter P
-
-    for position_y in 94..154 {
-        for position_x in 206..216 {
-            Text::with_alignment("O", Point::new(position_x, position_y), espressif_style,  Alignment::Center)
-            .draw(&mut display)
-            .unwrap();
-        }
-    }
-
-    for y in (94..126).step_by(28) {
-        for position_y in y..y+3 {
-            for position_x in 216..266 {
-                Text::with_alignment("O", Point::new(position_x, position_y), espressif_style,  Alignment::Center)
-                .draw(&mut display)
-                .unwrap();
-            }
-        }
-    }
-
-    for position_y in 106..113 {
-        for position_x in 256..266 {
-            Text::with_alignment("O", Point::new(position_x, position_y), espressif_style,  Alignment::Center)
-            .draw(&mut display)
-            .unwrap();
-        }
-    }
-
+    
     //christmas hat
 
     let n = 6.0;
@@ -219,7 +142,20 @@ fn main() -> ! {
     .into_styled(cushion_style)
     .draw(&mut display)
     .unwrap();
+
+    RoundedRectangle::with_equal_corners(
+        Rectangle::new(Point::new(114, 81), Size::new(95, 95)),
+        Size::new(10, 10),
+    )
+    .into_styled(hat_style)
+    .draw(&mut display)
+    .unwrap();
     
+    let bmp_data = include_bytes!("../data/espressif.bmp");
+
+    let bmp = Bmp::from_slice(bmp_data).unwrap();
+
+    Image::new(&bmp, Point::new(124, 92)).draw(&mut display).unwrap();
 
     loop {}
 }
