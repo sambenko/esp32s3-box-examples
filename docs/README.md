@@ -131,4 +131,10 @@
    cargo espflash --release --example christmassif
 ```
 
+<div align="center">
+  <a href="https://github.com/sambenko/esp32s3-box-examples">
+    <img src="images/christmassif.jpg" alt="Christmassif" width="400" height="400">
+  </a>
+</div>
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
