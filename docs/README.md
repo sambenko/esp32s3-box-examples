@@ -103,8 +103,6 @@
   </a>
 </div>
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 <br/><br/>
 <br/><br/>
 
@@ -119,8 +117,6 @@
     <img src="images/chains.jpg" alt="Esp chains" width="400" height="400">
   </a>
 </div>
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 <br/><br/>
 <br/><br/>
