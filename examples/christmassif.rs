@@ -120,15 +120,10 @@ fn main() -> ! {
     }
 
     let hat_style = PrimitiveStyleBuilder::new()
-        .stroke_color(RgbColor::BLACK)
-        .stroke_width(4)
-        .stroke_alignment(StrokeAlignment::Inside)
         .fill_color(RgbColor::RED)
         .build();
     
     let cushion_style = PrimitiveStyleBuilder::new()
-        .stroke_color(RgbColor::BLACK)
-        .stroke_width(4)
         .fill_color(RgbColor::WHITE)
         .build();
 
