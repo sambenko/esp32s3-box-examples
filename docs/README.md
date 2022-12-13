@@ -121,3 +121,14 @@
 </div>
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+<br/><br/>
+<br/><br/>
+
+* Espressif Christmas
+
+```sh
+   cargo espflash --release --example christmassif
+```
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
