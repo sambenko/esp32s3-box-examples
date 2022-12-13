@@ -93,6 +93,12 @@ fn main() -> ! {
         .text_color(RgbColor::WHITE)
         .build();
     
+    let snowflakes = include_bytes!("../data/snowflakes.bmp");
+
+    let snowflakes_bmp = Bmp::from_slice(snowflakes).unwrap();
+
+    Image::new(&snowflakes_bmp, Point::new(0, 0)).draw(&mut display).unwrap();
+
     //christmas hat
 
     let n = 6.0;
@@ -108,7 +114,7 @@ fn main() -> ! {
         x = r * cos(a);
         y = r * sin(a);
 
-        Text::with_alignment("o", Point::new((x + 161.0) as i32, (y + 22.0) as i32), default_style,  Alignment::Center)
+        Text::with_alignment("o", Point::new((x + 161.0) as i32, (y + 45.0) as i32), default_style,  Alignment::Center)
             .draw(&mut display)
             .unwrap();
     }
@@ -127,16 +133,16 @@ fn main() -> ! {
         .build();
 
     Triangle::new(
-        Point::new(161, 32),
-        Point::new(128, 64),
-        Point::new(195, 64),
+        Point::new(161, 52),
+        Point::new(128, 84),
+        Point::new(195, 84),
     )
     .into_styled(hat_style)
     .draw(&mut display)
     .unwrap();
 
     RoundedRectangle::with_equal_corners(
-        Rectangle::new(Point::new(122, 64), Size::new(80, 20)),
+        Rectangle::new(Point::new(122, 84), Size::new(80, 20)),
         Size::new(10, 10),
     )
     .into_styled(cushion_style)
@@ -144,7 +150,7 @@ fn main() -> ! {
     .unwrap();
 
     RoundedRectangle::with_equal_corners(
-        Rectangle::new(Point::new(114, 81), Size::new(95, 95)),
+        Rectangle::new(Point::new(114, 101), Size::new(95, 95)),
         Size::new(10, 10),
     )
     .into_styled(hat_style)
@@ -155,7 +161,8 @@ fn main() -> ! {
 
     let bmp = Bmp::from_slice(bmp_data).unwrap();
 
-    Image::new(&bmp, Point::new(124, 92)).draw(&mut display).unwrap();
+    Image::new(&bmp, Point::new(124, 112)).draw(&mut display).unwrap();
+
 
     loop {}
 }
