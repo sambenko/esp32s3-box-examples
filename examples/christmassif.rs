@@ -4,7 +4,7 @@
 use display_interface_spi::SPIInterfaceNoCS;
 
 use embedded_graphics::{
-    prelude::{RgbColor, Point, Primitive, Size},
+    prelude::{RgbColor, Point, Primitive, Size, DrawTarget, Dimensions, DrawTargetExt},
     image::Image,
     pixelcolor::Rgb565,
     mono_font::{
@@ -19,17 +19,18 @@ use embedded_graphics::{
 use tinybmp::Bmp;
 
 use esp32s3_hal::{
-    clock::ClockControl,
+    clock::{ClockControl, CpuClock},
     pac::{Peripherals, debug_assist::core_1_area_pc::R},
     prelude::*,
     spi,
     timer::TimerGroup,
     Rtc,
     IO,
-    Delay,
+    Rng,
+    Delay, gpio::Gpio38, ehal::can::Error,
 };
 
-use mipidsi::DisplayOptions;
+use mipidsi::{DisplayOptions, Display};
 
 use core::f32::consts::PI;
 use libm::{sin, cos};
@@ -39,11 +40,25 @@ use esp_backtrace as _;
 
 use xtensa_lx_rt::entry;
 
+use embedded_graphics_framebuf::FrameBuf;
+
+
+fn ferris<D>(display: &mut D)
+where 
+    D:DrawTarget<Color = Rgb565>+Dimensions {
+
+    let ferris_data = include_bytes!("../data/ferris.bmp");
+    let ferris = Bmp::from_slice(ferris_data).unwrap();
+    Image::new(&ferris, Point::new(97, 140)).draw(display);
+    
+}
+
+
 #[entry]
 fn main() -> ! {
     let peripherals = Peripherals::take().unwrap();
     let mut system = peripherals.SYSTEM.split();
-    let clocks = ClockControl::boot_defaults(system.clock_control).freeze();
+    let clocks = ClockControl::configure(system.clock_control, CpuClock::Clock240MHz).freeze();
 
     let mut rtc = Rtc::new(peripherals.RTC_CNTL);
     let timer_group0 = TimerGroup::new(peripherals.TIMG0, &clocks);
@@ -55,6 +70,7 @@ fn main() -> ! {
 
     wdt0.disable();
     wdt1.disable();
+
 
     let mut delay = Delay::new(&clocks);
 
@@ -88,16 +104,15 @@ fn main() -> ! {
     let mut display = mipidsi::Display::ili9342c_rgb565(di, core::prelude::v1::Some(reset), display_options);
     display.init(&mut delay).unwrap();
 
+    let mut data = [Rgb565::BLACK; 320 * 240];
+    let mut fbuf = FrameBuf::new(&mut data, 320, 240);
+
+    display.draw_iter(fbuf.into_iter()).unwrap();
+
     let default_style = MonoTextStyleBuilder::new()
         .font(&FONT_10X20)
         .text_color(RgbColor::WHITE)
         .build();
-    
-    let snowflakes = include_bytes!("../data/snowflakes.bmp");
-
-    let snowflakes_bmp = Bmp::from_slice(snowflakes).unwrap();
-
-    Image::new(&snowflakes_bmp, Point::new(0, 0)).draw(&mut display).unwrap();
 
     //christmas hat
 
@@ -114,10 +129,12 @@ fn main() -> ! {
         x = r * cos(a);
         y = r * sin(a);
 
-        Text::with_alignment("o", Point::new((x + 161.0) as i32, (y + 45.0) as i32), default_style,  Alignment::Center)
-            .draw(&mut display)
+        Text::with_alignment("o", Point::new((x + 74.0) as i32, (y + 45.0) as i32), default_style,  Alignment::Center)
+            .draw(&mut fbuf)
             .unwrap();
     }
+
+    display.draw_iter(fbuf.into_iter()).unwrap();
 
     let hat_style = PrimitiveStyleBuilder::new()
         .fill_color(RgbColor::RED)
@@ -128,36 +145,41 @@ fn main() -> ! {
         .build();
 
     Triangle::new(
-        Point::new(161, 52),
-        Point::new(128, 84),
-        Point::new(195, 84),
+        Point::new(74, 52),
+        Point::new(43, 84),
+        Point::new(108, 84),
     )
     .into_styled(hat_style)
-    .draw(&mut display)
+    .draw(&mut fbuf)
     .unwrap();
 
     RoundedRectangle::with_equal_corners(
-        Rectangle::new(Point::new(122, 84), Size::new(80, 20)),
+        Rectangle::new(Point::new(36, 74), Size::new(80, 20)),
         Size::new(10, 10),
     )
     .into_styled(cushion_style)
-    .draw(&mut display)
+    .draw(&mut fbuf)
     .unwrap();
 
     RoundedRectangle::with_equal_corners(
-        Rectangle::new(Point::new(114, 101), Size::new(95, 95)),
+        Rectangle::new(Point::new(29, 78), Size::new(95, 95)),
         Size::new(10, 10),
     )
     .into_styled(hat_style)
-    .draw(&mut display)
+    .draw(&mut fbuf)
     .unwrap();
     
     let bmp_data = include_bytes!("../data/espressif.bmp");
 
     let bmp = Bmp::from_slice(bmp_data).unwrap();
 
-    Image::new(&bmp, Point::new(124, 112)).draw(&mut display).unwrap();
+    Image::new(&bmp, Point::new(37, 87)).draw(&mut fbuf).unwrap();
 
+
+    #[cfg(any(feature = "rust"))]
+    ferris(&mut fbuf);
+    
+    display.draw_iter(fbuf.into_iter()).unwrap();
 
     loop {}
 }
