@@ -50,7 +50,7 @@ where
 
     let ferris_data = include_bytes!("../data/ferris.bmp");
     let ferris = Bmp::from_slice(ferris_data).unwrap();
-    Image::new(&ferris, Point::new(97, 140)).draw(display);
+    Image::new(&ferris, Point::new(87, 140)).draw(display);
     
 }
 
@@ -61,14 +61,6 @@ where
     let default_style = MonoTextStyleBuilder::new()
         .font(&FONT_10X20)
         .text_color(RgbColor::WHITE)
-        .build();
-
-    let hat_style = PrimitiveStyleBuilder::new()
-        .fill_color(RgbColor::RED)
-        .build();
-    
-    let cushion_style = PrimitiveStyleBuilder::new()
-        .fill_color(RgbColor::WHITE)
         .build();
 
     let n = 6.0;
@@ -93,14 +85,14 @@ where
         Point::new((pos_x - 32.0) as i32, (pos_y + 41.0) as i32),
         Point::new((pos_x + 35.0) as i32, (pos_y + 41.0) as i32),
     )
-    .into_styled(hat_style)
+    .into_styled(PrimitiveStyle::with_fill(RgbColor::RED))
     .draw(fbuf);
 
     RoundedRectangle::with_equal_corners(
         Rectangle::new(Point::new((pos_x - 42.0) as i32, (pos_y + 42.0) as i32), Size::new(89, 18)),
         Size::new(10, 10),
     )
-    .into_styled(cushion_style)
+    .into_styled(PrimitiveStyle::with_fill(RgbColor::WHITE))
     .draw(fbuf);
     
 }
@@ -109,25 +101,76 @@ where
 fn logo<D>(fbuf: &mut D)
 where
     D:DrawTarget<Color = Rgb565>+Dimensions {
-    
-    let esp_frame = PrimitiveStyleBuilder::new()
-        .fill_color(RgbColor::RED)
-        .build();
 
     RoundedRectangle::with_equal_corners(
-        Rectangle::new(Point::new(29, 80), Size::new(95, 95)),
+        Rectangle::new(Point::new(19, 80), Size::new(95, 95)),
         Size::new(10, 10),
     )
-    .into_styled(esp_frame)
+    .into_styled(PrimitiveStyle::with_fill(RgbColor::RED))
     .draw(fbuf);
 
     let espressif_data = include_bytes!("../data/espressif.bmp");
 
     let logo = Bmp::from_slice(espressif_data).unwrap();
 
-    Image::new(&logo, Point::new(40, 89)).draw(fbuf);
-    }
+    Image::new(&logo, Point::new(30, 89)).draw(fbuf);
+}
 
+fn tree<D>(fbuf: &mut D)
+where
+    D:DrawTarget<Color = Rgb565>+Dimensions {
+    
+    let tree_style = PrimitiveStyleBuilder::new()
+        .fill_color(RgbColor::GREEN)
+        .build();
+    
+    let bark_style = PrimitiveStyleBuilder::new()
+        .fill_color(Rgb565::new(58, 29, 0))
+        .build();
+    
+    Triangle::new(
+        Point::new(280, 5),
+        Point::new(250, 75),
+        Point::new(310, 75),
+    )
+    .into_styled(tree_style)
+    .draw(fbuf);
+
+    Triangle::new(
+        Point::new(280, 35),
+        Point::new(250, 135),
+        Point::new(310, 135),
+    )
+    .into_styled(tree_style)
+    .draw(fbuf);
+
+    Triangle::new(
+        Point::new(280, 95),
+        Point::new(250, 195),
+        Point::new(310, 195),
+    )
+    .into_styled(tree_style)
+    .draw(fbuf);
+
+    Rectangle::new(Point::new(275, 196), Size::new(15, 45))
+    .into_styled(bark_style)
+    .draw(fbuf);    
+}
+
+
+fn gift<D>(fbuf: &mut D, pos_x: i32, pos_y: i32)
+where
+    D:DrawTarget<Color = Rgb565>+Dimensions {
+    
+    let gift_data = include_bytes!("../data/gift1.bmp");
+
+    let gift = Bmp::from_slice(gift_data).unwrap();
+
+    Image::new(&gift, Point::new(pos_x, pos_y)).draw(fbuf);
+
+
+
+    }
 #[entry]
 fn main() -> ! {
     let peripherals = Peripherals::take().unwrap();
@@ -182,11 +225,15 @@ fn main() -> ! {
     let mut fbuf = FrameBuf::new(&mut data, 320, 240);
     //let mut sbuf = SpriteBuf::new(fbuf);
 
-    hat(&mut fbuf, 74.0, 20.0);
+    hat(&mut fbuf, 64.0, 20.0);
     logo(&mut fbuf);
 
     ferris(&mut fbuf);
-    hat(&mut fbuf, 176.0, 105.0);
+    hat(&mut fbuf, 166.0, 105.0);
+
+    tree(&mut fbuf);
+    gift(&mut fbuf, 250, 215);
+
     display.draw_iter(fbuf.into_iter()).unwrap();
 
     loop {}
