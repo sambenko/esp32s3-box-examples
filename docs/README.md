@@ -121,15 +121,15 @@
 <br/><br/>
 <br/><br/>
 
-* Espressif Christmas
+* Rust Christmas
 
 ```sh
-   cargo espflash --release --example christmassif
+   cargo espflash --release --example rustmas
 ```
 
 <div align="center">
   <a href="https://github.com/sambenko/esp32s3-box-examples">
-    <img src="images/christmassif.jpg" alt="Christmassif" width="400" height="400">
+    <img src="images/rustmas.jpg" alt="Rustmas" width="400" height="400">
   </a>
 </div>
 
