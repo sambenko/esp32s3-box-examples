@@ -14,11 +14,13 @@ esp-println = { version = "0.3.1", features = [ "esp32s3" ] }
 embedded-graphics = "0.7"
 mipidsi = "0.4"
 display-interface-spi = "0.4"
+embedded-graphics-framebuf = "0.2.0"
 
 #snow dependencies
 libm = "0.2.5"
 tinybmp = "0.4.0"
 
 [features]
+rust = []
 default = ["rt"]
 rt = ["xtensa-lx-rt"]
