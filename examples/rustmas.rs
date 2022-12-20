@@ -54,6 +54,79 @@ where
     
 }
 
+fn hat<D>(fbuf: &mut D, pos_x: f64, pos_y: f64)
+where
+    D:DrawTarget<Color = Rgb565>+Dimensions {
+
+    let default_style = MonoTextStyleBuilder::new()
+        .font(&FONT_10X20)
+        .text_color(RgbColor::WHITE)
+        .build();
+
+    let hat_style = PrimitiveStyleBuilder::new()
+        .fill_color(RgbColor::RED)
+        .build();
+    
+    let cushion_style = PrimitiveStyleBuilder::new()
+        .fill_color(RgbColor::WHITE)
+        .build();
+
+    let n = 6.0;
+    let d = 71.0;    
+    let mut a;
+    let mut r;
+    let mut x;
+    let mut y;
+    
+    for t in 0..361 {
+        a = t as f64 * d * (PI as f64 / 18.0);
+        r = 10.0 * sin(n * a);
+        x = r * cos(a);
+        y = r * sin(a);
+
+        Text::with_alignment("o", Point::new((x + pos_x) as i32, (y + pos_y) as i32), default_style,  Alignment::Center)
+            .draw(fbuf);
+    }
+
+    Triangle::new(
+        Point::new(pos_x as i32, (pos_y + 8.0) as i32),
+        Point::new((pos_x - 32.0) as i32, (pos_y + 41.0) as i32),
+        Point::new((pos_x + 35.0) as i32, (pos_y + 41.0) as i32),
+    )
+    .into_styled(hat_style)
+    .draw(fbuf);
+
+    RoundedRectangle::with_equal_corners(
+        Rectangle::new(Point::new((pos_x - 42.0) as i32, (pos_y + 42.0) as i32), Size::new(89, 18)),
+        Size::new(10, 10),
+    )
+    .into_styled(cushion_style)
+    .draw(fbuf);
+    
+}
+
+
+fn logo<D>(fbuf: &mut D)
+where
+    D:DrawTarget<Color = Rgb565>+Dimensions {
+    
+    let esp_frame = PrimitiveStyleBuilder::new()
+        .fill_color(RgbColor::RED)
+        .build();
+
+    RoundedRectangle::with_equal_corners(
+        Rectangle::new(Point::new(29, 80), Size::new(95, 95)),
+        Size::new(10, 10),
+    )
+    .into_styled(esp_frame)
+    .draw(fbuf);
+
+    let espressif_data = include_bytes!("../data/espressif.bmp");
+
+    let logo = Bmp::from_slice(espressif_data).unwrap();
+
+    Image::new(&logo, Point::new(40, 89)).draw(fbuf);
+    }
 
 #[entry]
 fn main() -> ! {
@@ -109,76 +182,11 @@ fn main() -> ! {
     let mut fbuf = FrameBuf::new(&mut data, 320, 240);
     //let mut sbuf = SpriteBuf::new(fbuf);
 
-    display.draw_iter(fbuf.into_iter()).unwrap();
-
-    let default_style = MonoTextStyleBuilder::new()
-        .font(&FONT_10X20)
-        .text_color(RgbColor::WHITE)
-        .build();
-
-    //christmas hat
-
-    let n = 6.0;
-    let d = 71.0;    
-    let mut a;
-    let mut r;
-    let mut x;
-    let mut y;
-    
-    for t in 0..361 {
-        a = t as f64 * d * (PI as f64 / 18.0);
-        r = 10.0 * sin(n * a);
-        x = r * cos(a);
-        y = r * sin(a);
-
-        Text::with_alignment("o", Point::new((x + 74.0) as i32, (y + 20.0) as i32), default_style,  Alignment::Center)
-            .draw(&mut fbuf)
-            .unwrap();
-    }
-
-    display.draw_iter(fbuf.into_iter()).unwrap();
-
-    let hat_style = PrimitiveStyleBuilder::new()
-        .fill_color(RgbColor::RED)
-        .build();
-    
-    let cushion_style = PrimitiveStyleBuilder::new()
-        .fill_color(RgbColor::WHITE)
-        .build();
-
-    Triangle::new(
-        Point::new(74, 28),
-        Point::new(42, 61),
-        Point::new(109, 61),
-    )
-    .into_styled(hat_style)
-    .draw(&mut fbuf)
-    .unwrap();
-
-    RoundedRectangle::with_equal_corners(
-        Rectangle::new(Point::new(32, 62), Size::new(89, 18)),
-        Size::new(10, 10),
-    )
-    .into_styled(cushion_style)
-    .draw(&mut fbuf)
-    .unwrap();
-
-    RoundedRectangle::with_equal_corners(
-        Rectangle::new(Point::new(29, 80), Size::new(95, 95)),
-        Size::new(10, 10),
-    )
-    .into_styled(hat_style)
-    .draw(&mut fbuf)
-    .unwrap();
-    
-    let espressif_data = include_bytes!("../data/espressif.bmp");
-
-    let logo = Bmp::from_slice(espressif_data).unwrap();
-
-    Image::new(&logo, Point::new(40, 89)).draw(&mut fbuf).unwrap();
+    hat(&mut fbuf, 74.0, 20.0);
+    logo(&mut fbuf);
 
     ferris(&mut fbuf);
-    
+    hat(&mut fbuf, 176.0, 105.0);
     display.draw_iter(fbuf.into_iter()).unwrap();
 
     loop {}
