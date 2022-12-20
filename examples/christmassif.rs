@@ -41,6 +41,7 @@ use esp_backtrace as _;
 use xtensa_lx_rt::entry;
 
 use embedded_graphics_framebuf::FrameBuf;
+//use spooky_core::spritebuf::SpriteBuf;
 
 
 fn ferris<D>(display: &mut D)
@@ -106,6 +107,7 @@ fn main() -> ! {
 
     let mut data = [Rgb565::BLACK; 320 * 240];
     let mut fbuf = FrameBuf::new(&mut data, 320, 240);
+    //let mut sbuf = SpriteBuf::new(fbuf);
 
     display.draw_iter(fbuf.into_iter()).unwrap();
 
@@ -129,7 +131,7 @@ fn main() -> ! {
         x = r * cos(a);
         y = r * sin(a);
 
-        Text::with_alignment("o", Point::new((x + 74.0) as i32, (y + 45.0) as i32), default_style,  Alignment::Center)
+        Text::with_alignment("o", Point::new((x + 74.0) as i32, (y + 20.0) as i32), default_style,  Alignment::Center)
             .draw(&mut fbuf)
             .unwrap();
     }
@@ -145,16 +147,16 @@ fn main() -> ! {
         .build();
 
     Triangle::new(
-        Point::new(74, 52),
-        Point::new(43, 84),
-        Point::new(108, 84),
+        Point::new(74, 28),
+        Point::new(42, 61),
+        Point::new(109, 61),
     )
     .into_styled(hat_style)
     .draw(&mut fbuf)
     .unwrap();
 
     RoundedRectangle::with_equal_corners(
-        Rectangle::new(Point::new(36, 74), Size::new(80, 20)),
+        Rectangle::new(Point::new(32, 62), Size::new(89, 18)),
         Size::new(10, 10),
     )
     .into_styled(cushion_style)
@@ -162,21 +164,19 @@ fn main() -> ! {
     .unwrap();
 
     RoundedRectangle::with_equal_corners(
-        Rectangle::new(Point::new(29, 78), Size::new(95, 95)),
+        Rectangle::new(Point::new(29, 80), Size::new(95, 95)),
         Size::new(10, 10),
     )
     .into_styled(hat_style)
     .draw(&mut fbuf)
     .unwrap();
     
-    let bmp_data = include_bytes!("../data/espressif.bmp");
+    let espressif_data = include_bytes!("../data/espressif.bmp");
 
-    let bmp = Bmp::from_slice(bmp_data).unwrap();
+    let logo = Bmp::from_slice(espressif_data).unwrap();
 
-    Image::new(&bmp, Point::new(37, 87)).draw(&mut fbuf).unwrap();
+    Image::new(&logo, Point::new(40, 89)).draw(&mut fbuf).unwrap();
 
-
-    #[cfg(any(feature = "rust"))]
     ferris(&mut fbuf);
     
     display.draw_iter(fbuf.into_iter()).unwrap();
