@@ -34,6 +34,7 @@ use mipidsi::{DisplayOptions, Display};
 
 use core::f32::consts::PI;
 use libm::{sin, cos};
+use esp_println::println;
 
 #[allow(unused_imports)]
 use esp_backtrace as _;
@@ -225,16 +226,52 @@ fn main() -> ! {
     let mut fbuf = FrameBuf::new(&mut data, 320, 240);
     //let mut sbuf = SpriteBuf::new(fbuf);
 
-    hat(&mut fbuf, 64.0, 20.0);
-    logo(&mut fbuf);
+    let mut rng = Rng::new(peripherals.RNG);
+    let mut seed_buffer = [0u8; 40];
+    
+    
 
-    ferris(&mut fbuf);
-    hat(&mut fbuf, 166.0, 105.0);
+    // hat(&mut fbuf, 64.0, 20.0);
+    // logo(&mut fbuf);
 
-    tree(&mut fbuf);
-    gift(&mut fbuf, 250, 215);
+    // ferris(&mut fbuf);
+    // hat(&mut fbuf, 166.0, 105.0);
 
-    display.draw_iter(fbuf.into_iter()).unwrap();
+    // tree(&mut fbuf);
+    // gift(&mut fbuf, 250, 215);
 
-    loop {}
+    // display.draw_iter(fbuf.into_iter()).unwrap();
+
+    loop {
+        rng.read(&mut seed_buffer).unwrap();
+
+        let mut main_counter = 0;
+        let mut counter1 = 0;
+        let mut counter2 = 0;
+        let mut counter3 = 0;
+        let mut counter4 = 0;
+        
+        while(counter4 < 250) {
+            gift(&mut fbuf, seed_buffer[0] as i32, main_counter);
+            if (main_counter > 50) {
+                gift(&mut fbuf, seed_buffer[1] as i32, counter1);
+                counter1 += 5;
+            }
+            if (main_counter > 100) {
+                gift(&mut fbuf, seed_buffer[2] as i32, counter2);
+                counter2 += 5;
+            }
+            if (main_counter > 150) {
+                gift(&mut fbuf, seed_buffer[3] as i32, counter3);
+                counter3 += 5;
+            }
+            if (main_counter > 200) {
+                gift(&mut fbuf, seed_buffer[4] as i32, counter4);
+                counter4 += 5;
+            }
+            display.draw_iter(fbuf.into_iter()).unwrap();
+            fbuf.clear(Rgb565::BLACK);
+            main_counter += 5;
+        }
+    }
 }
