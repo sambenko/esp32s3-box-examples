@@ -20,7 +20,7 @@ use tinybmp::Bmp;
 
 use esp32s3_hal::{
     clock::{ClockControl, CpuClock},
-    pac::{Peripherals, debug_assist::core_1_area_pc::R},
+    pac::{Peripherals, debug_assist::core_1_area_pc::R, hmac::set_message_pad},
     prelude::*,
     spi,
     timer::TimerGroup,
@@ -168,10 +168,34 @@ where
     let gift = Bmp::from_slice(gift_data).unwrap();
 
     Image::new(&gift, Point::new(pos_x, pos_y)).draw(fbuf);
+}
 
+fn snowflake<D>(fbuf: &mut D, pos_x: f64, pos_y: i32) 
+where
+    D:DrawTarget<Color = Rgb565>+Dimensions {
+        let default_style = MonoTextStyleBuilder::new()
+        .font(&FONT_10X20)
+        .text_color(RgbColor::WHITE)
+        .build();
 
+    let n = 6.0;
+    let d = 71.0;    
+    let mut a;
+    let mut r;
+    let mut x;
+    let mut y;
+    
+    for t in 0..361 {
+        a = t as f64 * d * (PI as f64 / 18.0);
+        r = 10.0 * sin(n * a);
+        x = r * cos(a);
+        y = r * sin(a);
 
+        Text::with_alignment("o", Point::new((x + pos_x) as i32, y as i32 + pos_y), default_style,  Alignment::Center)
+            .draw(fbuf);
     }
+}
+
 #[entry]
 fn main() -> ! {
     let peripherals = Peripherals::take().unwrap();
@@ -227,51 +251,44 @@ fn main() -> ! {
     //let mut sbuf = SpriteBuf::new(fbuf);
 
     let mut rng = Rng::new(peripherals.RNG);
-    let mut seed_buffer = [0u8; 40];
-    
-    
+    let mut x_values = [0u8; 10];
+    let mut num_buffer = [0u8; 1];
 
-    // hat(&mut fbuf, 64.0, 20.0);
-    // logo(&mut fbuf);
-
-    // ferris(&mut fbuf);
-    // hat(&mut fbuf, 166.0, 105.0);
-
-    // tree(&mut fbuf);
-    // gift(&mut fbuf, 250, 215);
-
-    // display.draw_iter(fbuf.into_iter()).unwrap();
+    rng.read(&mut x_values).unwrap();
+    let mut y_values = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    let mut offsets = [0, 25, 50, 75, 100, 125, 150, 175, 200, 225];
+    let mut main_counter = 0;
 
     loop {
-        rng.read(&mut seed_buffer).unwrap();
+        hat(&mut fbuf, 64.0, 20.0);
+        logo(&mut fbuf);
 
-        let mut main_counter = 0;
-        let mut counter1 = 0;
-        let mut counter2 = 0;
-        let mut counter3 = 0;
-        let mut counter4 = 0;
+        ferris(&mut fbuf);
+        hat(&mut fbuf, 166.0, 105.0);
+
+        tree(&mut fbuf);
+        gift(&mut fbuf, 250, 215);
+
+        for i in 0..10 {
+
+            if (main_counter > offsets[i]) {
+                gift(&mut fbuf, x_values[i] as i32, y_values[i]);
+                y_values[i] += 5;
+            }
+
+            if (y_values[i] > 240) {
+                y_values[i] = 0;
+                rng.read(&mut num_buffer).unwrap();
+                x_values[i] = num_buffer[0];
+            }
+        }
         
-        while(counter4 < 250) {
-            gift(&mut fbuf, seed_buffer[0] as i32, main_counter);
-            if (main_counter > 50) {
-                gift(&mut fbuf, seed_buffer[1] as i32, counter1);
-                counter1 += 5;
-            }
-            if (main_counter > 100) {
-                gift(&mut fbuf, seed_buffer[2] as i32, counter2);
-                counter2 += 5;
-            }
-            if (main_counter > 150) {
-                gift(&mut fbuf, seed_buffer[3] as i32, counter3);
-                counter3 += 5;
-            }
-            if (main_counter > 200) {
-                gift(&mut fbuf, seed_buffer[4] as i32, counter4);
-                counter4 += 5;
-            }
-            display.draw_iter(fbuf.into_iter()).unwrap();
-            fbuf.clear(Rgb565::BLACK);
-            main_counter += 5;
+        display.draw_iter(fbuf.into_iter()).unwrap();
+        fbuf.clear(Rgb565::BLACK);
+        main_counter += 5;
+
+        if (main_counter == 50000) {
+            main_counter = 0;
         }
     }
 }
