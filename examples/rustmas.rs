@@ -11,7 +11,7 @@ use embedded_graphics::{
         ascii::FONT_10X20,
         MonoTextStyleBuilder, MonoTextStyle,
     },
-    primitives::{Triangle, Line, Rectangle, RoundedRectangle, PrimitiveStyle, PrimitiveStyleBuilder, StrokeAlignment}, 
+    primitives::{Triangle, Line, Rectangle, RoundedRectangle, PrimitiveStyle, PrimitiveStyleBuilder, StrokeAlignment, Circle}, 
     text::{Alignment, Text},
     Drawable,
 };
@@ -263,9 +263,11 @@ fn main() -> ! {
 
     let mut rng = Rng::new(peripherals.RNG);
     let mut x_values = [0u8; 10];
+    let mut sizes = [0u8; 10];
     let mut num_buffer = [0u8; 1];
 
     rng.read(&mut x_values).unwrap();
+    rng.read(&mut sizes).unwrap();
     let mut y_values = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     let mut offsets = [0, 25, 50, 75, 100, 125, 150, 175, 200, 225];
     let mut main_counter = 0;
@@ -284,7 +286,9 @@ fn main() -> ! {
         for i in 0..10 {
 
             if (main_counter > offsets[i]) {
-                gift(&mut fbuf, x_values[i] as i32, y_values[i]);
+                Circle::new(Point::new(x_values[i] as i32, y_values[i]), sizes[i] as u32 % 15 + 5)
+                .into_styled(PrimitiveStyleBuilder::new().fill_color(RgbColor::WHITE).build())
+                .draw(&mut fbuf);
                 y_values[i] += 5;
             }
 
