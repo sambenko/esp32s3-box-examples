@@ -163,11 +163,22 @@ fn gift<D>(fbuf: &mut D, pos_x: i32, pos_y: i32)
 where
     D:DrawTarget<Color = Rgb565>+Dimensions {
     
-    let gift_data = include_bytes!("../data/gift1.bmp");
+    let gift_data = include_bytes!("../data/gift.bmp");
 
     let gift = Bmp::from_slice(gift_data).unwrap();
 
     Image::new(&gift, Point::new(pos_x, pos_y)).draw(fbuf);
+}
+
+fn gifts<D>(fbuf: &mut D, pos_x: i32, pos_y: i32)
+where
+    D:DrawTarget<Color = Rgb565>+Dimensions {
+    
+    let gift_data = include_bytes!("../data/stack_of_gifts.bmp");
+
+    let gifts = Bmp::from_slice(gift_data).unwrap();
+
+    Image::new(&gifts, Point::new(pos_x, pos_y)).draw(fbuf);
 }
 
 fn snowflake<D>(fbuf: &mut D, pos_x: f64, pos_y: i32) 
@@ -268,6 +279,7 @@ fn main() -> ! {
 
         tree(&mut fbuf);
         gift(&mut fbuf, 250, 215);
+        gifts(&mut fbuf, 290, 210);
 
         for i in 0..10 {
 
