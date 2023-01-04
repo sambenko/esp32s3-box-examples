@@ -1,6 +1,7 @@
 #![no_std]
 #![no_main]
 
+
 use display_interface_spi::SPIInterfaceNoCS;
 
 use embedded_graphics::{
@@ -42,7 +43,6 @@ use esp_backtrace as _;
 use xtensa_lx_rt::entry;
 
 use embedded_graphics_framebuf::FrameBuf;
-//use spooky_core::spritebuf::SpriteBuf;
 
 
 fn ferris<D>(display: &mut D)
@@ -121,13 +121,7 @@ fn tree<D>(fbuf: &mut D)
 where
     D:DrawTarget<Color = Rgb565>+Dimensions {
     
-    let tree_style = PrimitiveStyleBuilder::new()
-        .fill_color(RgbColor::GREEN)
-        .build();
-    
-    let bark_style = PrimitiveStyleBuilder::new()
-        .fill_color(Rgb565::new(58, 29, 0))
-        .build();
+    let tree_style = PrimitiveStyle::with_fill(RgbColor::GREEN);
     
     Triangle::new(
         Point::new(280, 5),
@@ -154,7 +148,7 @@ where
     .draw(fbuf);
 
     Rectangle::new(Point::new(275, 196), Size::new(15, 45))
-    .into_styled(bark_style)
+    .into_styled(PrimitiveStyle::with_fill(Rgb565::new(58, 29, 0)))
     .draw(fbuf);    
 }
 
@@ -179,32 +173,6 @@ where
     let gifts = Bmp::from_slice(gift_data).unwrap();
 
     Image::new(&gifts, Point::new(pos_x, pos_y)).draw(fbuf);
-}
-
-fn snowflake<D>(fbuf: &mut D, pos_x: f64, pos_y: i32) 
-where
-    D:DrawTarget<Color = Rgb565>+Dimensions {
-        let default_style = MonoTextStyleBuilder::new()
-        .font(&FONT_10X20)
-        .text_color(RgbColor::WHITE)
-        .build();
-
-    let n = 6.0;
-    let d = 71.0;    
-    let mut a;
-    let mut r;
-    let mut x;
-    let mut y;
-    
-    for t in 0..361 {
-        a = t as f64 * d * (PI as f64 / 18.0);
-        r = 10.0 * sin(n * a);
-        x = r * cos(a);
-        y = r * sin(a);
-
-        Text::with_alignment("o", Point::new((x + pos_x) as i32, y as i32 + pos_y), default_style,  Alignment::Center)
-            .draw(fbuf);
-    }
 }
 
 #[entry]
