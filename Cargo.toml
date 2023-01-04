@@ -20,7 +20,7 @@ embedded-graphics-framebuf = "0.2.0"
 #rustmas dependencies
 libm = "0.2.5"
 tinybmp = "0.4.0"
-rustmas-assets = { path = "rustmas-assets"}
+#rustmas-assets = { path = "./rustmas-assets"}
 
 [features]
 default = ["rt"]
