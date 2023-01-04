@@ -17,9 +17,10 @@ display-interface-spi = "0.4"
 embedded-graphics-framebuf = "0.2.0"
 #spooky-core = {git = "https://github.com/georgik/esp32-spooky-maze-game.git", default-features = false}
 
-#snow dependencies
+#rustmas dependencies
 libm = "0.2.5"
 tinybmp = "0.4.0"
+rustmas-assets = { path = "rustmas-assets"}
 
 [features]
 default = ["rt"]

@@ -1,0 +1,13 @@
+[package]
+name = "rustmas-assets"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+embedded-graphics = "0.7"
+libm = "0.2.5"
+tinybmp = "0.4.0"
+
+[features]
