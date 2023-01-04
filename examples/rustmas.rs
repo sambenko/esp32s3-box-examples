@@ -5,33 +5,23 @@
 use display_interface_spi::SPIInterfaceNoCS;
 
 use embedded_graphics::{
-    prelude::{RgbColor, Point, Primitive, Size, DrawTarget, Dimensions, DrawTargetExt},
-    image::Image,
+    prelude::{RgbColor, DrawTarget},
     pixelcolor::Rgb565,
-    mono_font::{
-        ascii::FONT_10X20,
-        MonoTextStyleBuilder, MonoTextStyle,
-    },
-    primitives::{Triangle, Line, Rectangle, RoundedRectangle, PrimitiveStyle, PrimitiveStyleBuilder, StrokeAlignment, Circle}, 
-    text::{Alignment, Text},
-    Drawable,
 };
 
 use esp32s3_hal::{
     clock::{ClockControl, CpuClock},
-    pac::{Peripherals, debug_assist::core_1_area_pc::R, hmac::set_message_pad},
+    pac::Peripherals,
     prelude::*,
     spi,
     timer::TimerGroup,
     Rtc,
     IO,
     Rng,
-    Delay, gpio::Gpio38, ehal::can::Error,
+    Delay,
 };
 
-use mipidsi::{DisplayOptions, Display};
-
-use esp_println::println;
+use mipidsi::DisplayOptions;
 
 #[allow(unused_imports)]
 use esp_backtrace as _;
@@ -104,7 +94,7 @@ fn main() -> ! {
     rng.read(&mut x_values).unwrap();
     rng.read(&mut sizes).unwrap();
     let mut y_values = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-    let mut offsets = [0, 25, 50, 75, 100, 125, 150, 175, 200, 225];
+    let offsets = [0, 25, 50, 75, 100, 125, 150, 175, 200, 225];
     let mut main_counter = 0;
 
     loop {
@@ -120,12 +110,12 @@ fn main() -> ! {
 
         for i in 0..10 {
 
-            if (main_counter > offsets[i]) {
+            if main_counter > offsets[i] {
                 rustmas_assets::snowflake(&mut fbuf, x_values[i] as i32, y_values[i], sizes[i] as u32);
                 y_values[i] += 5;
             }
 
-            if (y_values[i] > 240) {
+            if y_values[i] > 240 {
                 y_values[i] = 0;
                 rng.read(&mut num_buffer).unwrap();
                 x_values[i] = num_buffer[0];
@@ -133,10 +123,14 @@ fn main() -> ! {
         }
         
         display.draw_iter(fbuf.into_iter()).unwrap();
-        fbuf.clear(Rgb565::BLACK);
+
+        #[allow(unused_must_use)]{
+            fbuf.clear(Rgb565::BLACK);
+        }
+
         main_counter += 5;
 
-        if (main_counter == 50000) {
+        if main_counter == 50000 {
             main_counter = 0;
         }
     }

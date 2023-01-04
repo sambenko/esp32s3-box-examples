@@ -1,5 +1,6 @@
 #![no_std]
 #![no_main]
+#![allow(warnings)]
 
 use tinybmp::Bmp;
 
