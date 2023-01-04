@@ -1,3 +1,6 @@
+#![no_std]
+#![no_main]
+
 use tinybmp::Bmp;
 
 use core::f32::consts::PI;
@@ -11,21 +14,22 @@ use embedded_graphics::{
         ascii::FONT_10X20,
         MonoTextStyleBuilder,
     },
-    primitives::{Triangle, Rectangle, RoundedRectangle, PrimitiveStyle}, 
+    primitives::{Triangle, Rectangle, Circle, RoundedRectangle, PrimitiveStyle}, 
     text::{Alignment, Text},
+    Drawable,
 };
 
-fn ferris<D>(display: &mut D)
+pub fn ferris<D>(display: &mut D)
 where 
     D:DrawTarget<Color = Rgb565>+Dimensions {
 
-    let ferris_data = include_bytes!("../data/ferris.bmp");
+    let ferris_data = include_bytes!("../../data/ferris.bmp");
     let ferris = Bmp::from_slice(ferris_data).unwrap();
     Image::new(&ferris, Point::new(87, 140)).draw(display);
     
 }
 
-fn hat<D>(fbuf: &mut D, pos_x: f64, pos_y: f64)
+pub fn hat<D>(fbuf: &mut D, pos_x: f64, pos_y: f64)
 where
     D:DrawTarget<Color = Rgb565>+Dimensions {
 
@@ -68,7 +72,7 @@ where
     
 }
 
-fn logo<D>(fbuf: &mut D)
+pub fn logo<D>(fbuf: &mut D)
 where
     D:DrawTarget<Color = Rgb565>+Dimensions {
 
@@ -79,14 +83,14 @@ where
     .into_styled(PrimitiveStyle::with_fill(RgbColor::RED))
     .draw(fbuf);
 
-    let espressif_data = include_bytes!("../data/espressif.bmp");
+    let espressif_data = include_bytes!("../../data/espressif.bmp");
 
     let logo = Bmp::from_slice(espressif_data).unwrap();
 
     Image::new(&logo, Point::new(30, 89)).draw(fbuf);
 }
 
-fn tree<D>(fbuf: &mut D)
+pub fn tree<D>(fbuf: &mut D)
 where
     D:DrawTarget<Color = Rgb565>+Dimensions {
     
@@ -121,24 +125,34 @@ where
     .draw(fbuf);    
 }
 
-fn gift<D>(fbuf: &mut D, pos_x: i32, pos_y: i32)
+pub fn gift<D>(fbuf: &mut D, pos_x: i32, pos_y: i32)
 where
     D:DrawTarget<Color = Rgb565>+Dimensions {
     
-    let gift_data = include_bytes!("../data/gift.bmp");
+    let gift_data = include_bytes!("../../data/gift.bmp");
 
     let gift = Bmp::from_slice(gift_data).unwrap();
 
     Image::new(&gift, Point::new(pos_x, pos_y)).draw(fbuf);
 }
 
-fn gifts<D>(fbuf: &mut D, pos_x: i32, pos_y: i32)
+pub fn gifts<D>(fbuf: &mut D, pos_x: i32, pos_y: i32)
 where
     D:DrawTarget<Color = Rgb565>+Dimensions {
     
-    let gift_data = include_bytes!("../data/stack_of_gifts.bmp");
+    let gift_data = include_bytes!("../../data/stack_of_gifts.bmp");
 
     let gifts = Bmp::from_slice(gift_data).unwrap();
 
     Image::new(&gifts, Point::new(pos_x, pos_y)).draw(fbuf);
+}
+
+pub fn snowflake<D>(fbuf: &mut D, x_value: i32, y_value: i32, size: u32)
+    where 
+        D:DrawTarget<Color = Rgb565>+Dimensions {
+    
+    Circle::new(Point::new(x_value, y_value), size % 15 + 5)
+        .into_styled(PrimitiveStyle::with_fill(RgbColor::WHITE))
+        .draw(fbuf);
+
 }
