@@ -136,7 +136,7 @@ checksum = "489378ad054862146fbd1f09f51d585ccbe4bd1e2feadcda2a13ac33f840e1a5"
 dependencies = [
  "byte-slice-cast",
  "display-interface",
- "embedded-hal 0.2.7",
+ "embedded-hal",
 ]
 
 [[package]]
@@ -192,15 +192,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "embedded-hal"
-version = "1.0.0-alpha.8"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c3babfc7fd332142a0b11aebf592992f211f4e01b6222fb04b03aba1bd80018d"
-dependencies = [
- "nb 1.0.0",
-]
-
-[[package]]
 name = "enum-as-inner"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -226,28 +217,32 @@ dependencies = [
 
 [[package]]
 name = "esp-backtrace"
-version = "0.2.0"
+version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1cc04e4a62fe7905eab18e12715feaded6cb51a5a878a0c067bbe29436bad96a"
+checksum = "1834d20d58dc6baaf063924cb3ffa0b7f6388a593bae310c9f228c4bd47f0dde"
 dependencies = [
- "esp-println 0.2.2",
+ "esp-println",
  "xtensa-lx-rt",
 ]
 
 [[package]]
 name = "esp-hal-common"
-version = "0.2.0"
+version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "23480b8b25ad0a0d600ef79624b4d6f6c8f3339b56e806f443e87e9f9d0b3a32"
+checksum = "007db8d84050d19fec367bece124cccbdf6837ff0ea8e1a4fc04599148ab5ea1"
 dependencies = [
  "cfg-if",
  "critical-section",
- "embedded-hal 0.2.7",
+ "embedded-dma",
+ "embedded-hal",
  "esp-hal-procmacros",
+ "esp-synopsys-usb-otg",
  "esp32s3",
  "fugit",
+ "lock_api",
  "nb 1.0.0",
  "paste",
+ "usb-device",
  "void",
  "xtensa-lx",
  "xtensa-lx-rt",
@@ -268,23 +263,29 @@ dependencies = [
 
 [[package]]
 name = "esp-println"
-version = "0.2.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dab33baae57ce7c0869c32885ff136f9c8405e0c201d039ccd767c3e7f79502b"
-
-[[package]]
-name = "esp-println"
 version = "0.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "adcfe5d532cf2029b11996cab6b4af948f41c24b131c76422115634711549aaa"
 
 [[package]]
-name = "esp32s3"
-version = "0.3.0"
+name = "esp-synopsys-usb-otg"
+version = "0.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c39688fbefe925b6fc7bf5b2ceeadf32b6f6049323c14d58180a98656393b8e9"
+checksum = "0879f2f008c0213b1a5959345e54afcbf1490c1591f5145a5e65bdff371b65af"
 dependencies = [
- "bare-metal",
+ "critical-section",
+ "embedded-hal",
+ "usb-device",
+ "vcell",
+]
+
+[[package]]
+name = "esp32s3"
+version = "0.11.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6af4af40ef25226541eac0ca76793618e4b1dbb5d5116b39cea9c72340cae8ec"
+dependencies = [
+ "critical-section",
  "vcell",
  "xtensa-lx",
  "xtensa-lx-rt",
@@ -292,13 +293,12 @@ dependencies = [
 
 [[package]]
 name = "esp32s3-hal"
-version = "0.2.0"
+version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ef739950b5071c5f57588592c5c355df439bc82bac0277b929c3b0b7f6cf8401"
+checksum = "ebe72253953413cd960a450505160dadf14bfe34ab0653fead5d464c9fdda1cb"
 dependencies = [
  "bare-metal",
- "embedded-hal 0.2.7",
- "embedded-hal 1.0.0-alpha.8",
+ "embedded-hal",
  "esp-hal-common",
  "xtensa-lx",
  "xtensa-lx-rt",
@@ -313,13 +313,22 @@ dependencies = [
  "embedded-graphics-framebuf",
  "esp-alloc",
  "esp-backtrace",
- "esp-println 0.3.1",
+ "esp-println",
  "esp32s3-hal",
+ "examples-assets",
  "libm",
  "mipidsi",
- "rustmas-assets",
  "tinybmp",
  "xtensa-lx-rt",
+]
+
+[[package]]
+name = "examples-assets"
+version = "0.1.0"
+dependencies = [
+ "embedded-graphics",
+ "libm",
+ "tinybmp",
 ]
 
 [[package]]
@@ -434,13 +443,12 @@ dependencies = [
 
 [[package]]
 name = "mipidsi"
-version = "0.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4447edb8af105ca7e17fdbc68ac24d6409e768f4701658efda66c01f9656fd77"
+version = "0.5.0"
+source = "git+https://github.com/almindor/mipidsi#3718dfe6647a0cfb61e279e0e01b771b35b14c16"
 dependencies = [
  "display-interface",
  "embedded-graphics-core",
- "embedded-hal 0.2.7",
+ "embedded-hal",
  "heapless",
  "nb 1.0.0",
 ]
@@ -477,9 +485,9 @@ dependencies = [
 
 [[package]]
 name = "paste"
-version = "1.0.8"
+version = "1.0.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9423e2b32f7a043629287a536f21951e8c6a82482d0acb1eeebfc90bc2225b22"
+checksum = "d01a5bd0424d00070b0098dd17ebca6f961a959dead1dbcbbbc1d1cd8d3deeba"
 
 [[package]]
 name = "proc-macro-error"
@@ -554,7 +562,7 @@ checksum = "5e2856a701069e2d262b264750d382407d272d5527f7a51d3777d1805b4e2d3c"
 dependencies = [
  "bare-metal",
  "bit_field",
- "embedded-hal 0.2.7",
+ "embedded-hal",
 ]
 
 [[package]]
@@ -564,15 +572,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bfa0f585226d2e68097d4f95d113b15b83a82e819ab25717ec0590d9584ef366"
 dependencies = [
  "semver",
-]
-
-[[package]]
-name = "rustmas-assets"
-version = "0.1.0"
-dependencies = [
- "embedded-graphics",
- "libm",
- "tinybmp",
 ]
 
 [[package]]
@@ -675,6 +674,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "84a22b9f218b40614adcb3f4ff08b703773ad44fa9423e4e0d346d5db86e4ebc"
 
 [[package]]
+name = "usb-device"
+version = "0.2.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1f6cc3adc849b5292b4075fc0d5fdcf2f24866e88e336dd27a8943090a520508"
+
+[[package]]
 name = "vcell"
 version = "0.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -706,9 +711,9 @@ dependencies = [
 
 [[package]]
 name = "xtensa-lx-rt"
-version = "0.13.0"
+version = "0.14.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "33a17a83d25998da4f2dca85afb6456ea340d3bde0211bebac011eb45dcbd2f4"
+checksum = "c5e7d36626db2a67ba9b874988181d1dac18706914e804fca846add0c5e5eddb"
 dependencies = [
  "bare-metal",
  "core-isa-parser",

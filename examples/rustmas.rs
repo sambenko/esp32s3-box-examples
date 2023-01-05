@@ -21,7 +21,7 @@ use esp32s3_hal::{
     Delay,
 };
 
-use mipidsi::DisplayOptions;
+use mipidsi::{ Orientation, ColorOrder };
 
 #[allow(unused_imports)]
 use esp_backtrace as _;
@@ -30,7 +30,7 @@ use xtensa_lx_rt::entry;
 
 use embedded_graphics_framebuf::FrameBuf;
 
-use rustmas_assets;
+use examples_assets;
 
 #[entry]
 fn main() -> ! {
@@ -49,13 +49,16 @@ fn main() -> ! {
     wdt0.disable();
     wdt1.disable();
 
-
-    let mut delay = Delay::new(&clocks);
-
     let io = IO::new(peripherals.GPIO, peripherals.IO_MUX);
 
     let sclk = io.pins.gpio7;
     let mosi = io.pins.gpio6;
+    let dc = io.pins.gpio4;
+    let bcklght = io.pins.gpio45;
+    let rst = io.pins.gpio48;
+    
+    let mut backlight = bcklght.into_push_pull_output();
+    backlight.set_high().unwrap();
 
     let spi = spi::Spi::new_no_cs_no_miso(
         peripherals.SPI2,
@@ -67,25 +70,21 @@ fn main() -> ! {
         &clocks,
     );
 
-    let mut backlight = io.pins.gpio45.into_push_pull_output();
-    backlight.set_high().unwrap();
+    let di = SPIInterfaceNoCS::new(spi, dc.into_push_pull_output());
+    let reset = rst.into_push_pull_output();
 
-    let reset = io.pins.gpio48.into_push_pull_output();
+    let mut delay = Delay::new(&clocks);
 
-    let di = SPIInterfaceNoCS::new(spi, io.pins.gpio4.into_push_pull_output());
+    let mut display = mipidsi::Builder::ili9342c_rgb565(di)
+        .with_orientation(Orientation::PortraitInverted(false))
+        .with_color_order(ColorOrder::Bgr)
+        .init(&mut delay, Some(reset))
+        .unwrap();
 
-    let display_options = DisplayOptions {
-        orientation: mipidsi::Orientation::PortraitInverted(false),
-        ..Default::default()
-    };
-
-    let mut display = mipidsi::Display::ili9342c_rgb565(di, core::prelude::v1::Some(reset), display_options);
-    display.init(&mut delay).unwrap();
+    display.clear(Rgb565::BLACK).unwrap();
 
     let mut data = [Rgb565::BLACK; 320 * 240];
     let mut fbuf = FrameBuf::new(&mut data, 320, 240);
-    //let mut sbuf = SpriteBuf::new(fbuf);
-
     let mut rng = Rng::new(peripherals.RNG);
     let mut x_values = [0u8; 10];
     let mut sizes = [0u8; 10];
@@ -98,20 +97,20 @@ fn main() -> ! {
     let mut main_counter = 0;
 
     loop {
-        rustmas_assets::hat(&mut fbuf, 64.0, 20.0);
-        rustmas_assets::logo(&mut fbuf);
+        examples_assets::hat(&mut fbuf, 64.0, 20.0);
+        examples_assets::logo(&mut fbuf);
 
-        rustmas_assets::ferris(&mut fbuf);
-        rustmas_assets::hat(&mut fbuf, 166.0, 105.0);
+        examples_assets::ferris(&mut fbuf);
+        examples_assets::hat(&mut fbuf, 166.0, 105.0);
 
-        rustmas_assets::tree(&mut fbuf);
-        rustmas_assets::gift(&mut fbuf, 250, 215);
-        rustmas_assets::gifts(&mut fbuf, 290, 210);
+        examples_assets::tree(&mut fbuf);
+        examples_assets::gift(&mut fbuf, 250, 215);
+        examples_assets::gifts(&mut fbuf, 290, 210);
 
         for i in 0..10 {
 
             if main_counter > offsets[i] {
-                rustmas_assets::snowflake(&mut fbuf, x_values[i] as i32, y_values[i], sizes[i] as u32);
+                examples_assets::snowflake(&mut fbuf, x_values[i] as i32, y_values[i], sizes[i] as u32);
                 y_values[i] += 5;
             }
 
@@ -121,10 +120,10 @@ fn main() -> ! {
                 x_values[i] = num_buffer[0];
             }
         }
-        
+
         display.draw_iter(fbuf.into_iter()).unwrap();
 
-        #[allow(unused_must_use)]{
+        #[allow(unused_must_use)] {
             fbuf.clear(Rgb565::BLACK);
         }
 

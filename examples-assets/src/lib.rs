@@ -30,7 +30,7 @@ where
     
 }
 
-pub fn hat<D>(fbuf: &mut D, pos_x: f64, pos_y: f64)
+pub fn hat<D>(display: &mut D, pos_x: f64, pos_y: f64)
 where
     D:DrawTarget<Color = Rgb565>+Dimensions {
 
@@ -53,7 +53,7 @@ where
         y = r * sin(a);
 
         Text::with_alignment("o", Point::new((x + pos_x) as i32, (y + pos_y) as i32), default_style,  Alignment::Center)
-            .draw(fbuf);
+            .draw(display);
     }
 
     Triangle::new(
@@ -62,18 +62,18 @@ where
         Point::new((pos_x + 35.0) as i32, (pos_y + 41.0) as i32),
     )
     .into_styled(PrimitiveStyle::with_fill(RgbColor::RED))
-    .draw(fbuf);
+    .draw(display);
 
     RoundedRectangle::with_equal_corners(
         Rectangle::new(Point::new((pos_x - 42.0) as i32, (pos_y + 42.0) as i32), Size::new(89, 18)),
         Size::new(10, 10),
     )
     .into_styled(PrimitiveStyle::with_fill(RgbColor::WHITE))
-    .draw(fbuf);
+    .draw(display);
     
 }
 
-pub fn logo<D>(fbuf: &mut D)
+pub fn logo<D>(display: &mut D)
 where
     D:DrawTarget<Color = Rgb565>+Dimensions {
 
@@ -82,16 +82,16 @@ where
         Size::new(10, 10),
     )
     .into_styled(PrimitiveStyle::with_fill(RgbColor::RED))
-    .draw(fbuf);
+    .draw(display);
 
     let espressif_data = include_bytes!("../../data/espressif.bmp");
 
     let logo = Bmp::from_slice(espressif_data).unwrap();
 
-    Image::new(&logo, Point::new(30, 89)).draw(fbuf);
+    Image::new(&logo, Point::new(30, 89)).draw(display);
 }
 
-pub fn tree<D>(fbuf: &mut D)
+pub fn tree<D>(display: &mut D)
 where
     D:DrawTarget<Color = Rgb565>+Dimensions {
     
@@ -103,7 +103,7 @@ where
         Point::new(310, 75),
     )
     .into_styled(tree_style)
-    .draw(fbuf);
+    .draw(display);
 
     Triangle::new(
         Point::new(280, 35),
@@ -111,7 +111,7 @@ where
         Point::new(310, 135),
     )
     .into_styled(tree_style)
-    .draw(fbuf);
+    .draw(display);
 
     Triangle::new(
         Point::new(280, 95),
@@ -119,14 +119,14 @@ where
         Point::new(310, 195),
     )
     .into_styled(tree_style)
-    .draw(fbuf);
+    .draw(display);
 
     Rectangle::new(Point::new(275, 196), Size::new(15, 45))
     .into_styled(PrimitiveStyle::with_fill(Rgb565::new(58, 29, 0)))
-    .draw(fbuf);    
+    .draw(display);    
 }
 
-pub fn gift<D>(fbuf: &mut D, pos_x: i32, pos_y: i32)
+pub fn gift<D>(display: &mut D, pos_x: i32, pos_y: i32)
 where
     D:DrawTarget<Color = Rgb565>+Dimensions {
     
@@ -134,10 +134,10 @@ where
 
     let gift = Bmp::from_slice(gift_data).unwrap();
 
-    Image::new(&gift, Point::new(pos_x, pos_y)).draw(fbuf);
+    Image::new(&gift, Point::new(pos_x, pos_y)).draw(display);
 }
 
-pub fn gifts<D>(fbuf: &mut D, pos_x: i32, pos_y: i32)
+pub fn gifts<D>(display: &mut D, pos_x: i32, pos_y: i32)
 where
     D:DrawTarget<Color = Rgb565>+Dimensions {
     
@@ -145,15 +145,15 @@ where
 
     let gifts = Bmp::from_slice(gift_data).unwrap();
 
-    Image::new(&gifts, Point::new(pos_x, pos_y)).draw(fbuf);
+    Image::new(&gifts, Point::new(pos_x, pos_y)).draw(display);
 }
 
-pub fn snowflake<D>(fbuf: &mut D, x_value: i32, y_value: i32, size: u32)
+pub fn snowflake<D>(display: &mut D, x_value: i32, y_value: i32, size: u32)
     where 
         D:DrawTarget<Color = Rgb565>+Dimensions {
     
     Circle::new(Point::new(x_value, y_value), size % 15 + 5)
         .into_styled(PrimitiveStyle::with_fill(RgbColor::WHITE))
-        .draw(fbuf);
+        .draw(display);
 
 }

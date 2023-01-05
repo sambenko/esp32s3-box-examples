@@ -12,15 +12,14 @@ esp-backtrace = { version = "0.4.0", features = ["esp32s3", "panic-handler", "pr
 xtensa-lx-rt = { version = "0.14.0", features = ["esp32s3"], optional = true }
 esp-println = { version = "0.3.1", features = [ "esp32s3" ] }
 embedded-graphics = "0.7"
-mipidsi = "0.5.0"
+mipidsi = { git = "https://github.com/almindor/mipidsi" }
 display-interface-spi = "0.4"
 embedded-graphics-framebuf = "0.2.0"
-#spooky-core = {git = "https://github.com/georgik/esp32-spooky-maze-game.git", default-features = false}
 
 #rustmas dependencies
 libm = "0.2.5"
 tinybmp = "0.4.0"
-rustmas-assets = { path = "./rustmas-assets"}
+examples-assets = { path = "./examples-assets"}
 
 [features]
 default = ["rt"]
