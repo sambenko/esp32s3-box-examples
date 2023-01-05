@@ -5,11 +5,12 @@ use display_interface_spi::SPIInterfaceNoCS;
 
 use embedded_graphics::{
     prelude::RgbColor,
+    pixelcolor::Rgb565,
     mono_font::{
         ascii::FONT_10X20,
         MonoTextStyleBuilder,
     },
-    prelude::Point,
+    prelude::{Point, DrawTarget},
     text::{Alignment, Text},
     Drawable,
 };
@@ -27,7 +28,7 @@ use esp32s3_hal::{
 
 use esp_println::println;
 
-use mipidsi::DisplayOptions;
+use mipidsi::{ Orientation, ColorOrder };
 
 #[allow(unused_imports)]
 use esp_backtrace as _;
@@ -51,37 +52,41 @@ fn main() -> ! {
     wdt0.disable();
     wdt1.disable();
 
-    let mut delay = Delay::new(&clocks);
-
     let io = IO::new(peripherals.GPIO, peripherals.IO_MUX);
 
     let sclk = io.pins.gpio7;
     let mosi = io.pins.gpio6;
+    let dc = io.pins.gpio4;
+    let bcklght = io.pins.gpio45;
+    let rst = io.pins.gpio48;
+    
+    let mut backlight = bcklght.into_push_pull_output();
+    backlight.set_high().unwrap();
 
     let spi = spi::Spi::new_no_cs_no_miso(
         peripherals.SPI2,
         sclk,
         mosi,
-        4u32.MHz(),
+        100u32.MHz(),
         spi::SpiMode::Mode0,
         &mut system.peripheral_clock_control,
         &clocks,
     );
 
-    let mut backlight = io.pins.gpio45.into_push_pull_output();
-    backlight.set_high().unwrap();
+    let di = SPIInterfaceNoCS::new(spi, dc.into_push_pull_output());
+    let reset = rst.into_push_pull_output();
 
-    let reset = io.pins.gpio48.into_push_pull_output();
+    let mut delay = Delay::new(&clocks);
 
-    let di = SPIInterfaceNoCS::new(spi, io.pins.gpio4.into_push_pull_output());
+    let mut display = mipidsi::Builder::ili9342c_rgb565(di)
+        .with_display_size(320, 240)
+        .with_framebuffer_size(320, 240)
+        .with_orientation(mipidsi::Orientation::PortraitInverted(false))
+        .with_color_order(mipidsi::ColorOrder::Rgb)
+        .init(&mut delay, Some(reset))
+        .unwrap();
 
-    let display_options = DisplayOptions {
-        orientation: mipidsi::Orientation::PortraitInverted(false),
-        ..Default::default()
-    };
-
-    let mut display = mipidsi::Display::ili9342c_rgb565(di, core::prelude::v1::Some(reset), display_options);
-    display.init(&mut delay).unwrap();
+    display.clear(Rgb565::WHITE).unwrap();
 
     let espressif_style = MonoTextStyleBuilder::new()
         .font(&FONT_10X20)
