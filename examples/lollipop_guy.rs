@@ -4,14 +4,8 @@
 use display_interface_spi::SPIInterfaceNoCS;
 
 use embedded_graphics::{
-    prelude::RgbColor,
-    mono_font::{
-        ascii::FONT_10X20,
-        MonoTextStyleBuilder,
-    },
-    prelude::Point,
-    text::{Alignment, Text},
-    Drawable,
+    prelude::{ RgbColor, DrawTarget },
+    pixelcolor::Rgb565,
 };
 
 use esp32s3_hal::{
@@ -25,10 +19,9 @@ use esp32s3_hal::{
     Delay,
 };
 
-use mipidsi::DisplayOptions;
+use mipidsi::{ Orientation, ColorOrder };
 
-use core::f32::consts::PI;
-use libm::{sin, cos};
+use examples_assets::{body_part, hand};
 
 #[allow(unused_imports)]
 use esp_backtrace as _;
@@ -76,91 +69,29 @@ fn main() -> ! {
 
     let di = SPIInterfaceNoCS::new(spi, io.pins.gpio4.into_push_pull_output());
 
-    let display_options = DisplayOptions {
-        orientation: mipidsi::Orientation::PortraitInverted(false),
-        ..Default::default()
-    };
+    let mut display = mipidsi::Builder::ili9342c_rgb565(di)
+        .with_orientation(Orientation::PortraitInverted(false))
+        .with_color_order(ColorOrder::Rgb)
+        .init(&mut delay, core::prelude::v1::Some(reset))
+    .unwrap();
 
-    let mut display = mipidsi::Display::ili9342c_rgb565(di, core::prelude::v1::Some(reset), display_options);
-    display.init(&mut delay).unwrap();
+    display.clear(Rgb565::WHITE).unwrap();
 
-    let default_style = MonoTextStyleBuilder::new()
-        .font(&FONT_10X20)
-        .text_color(RgbColor::BLACK)
-        .build();
-
-    let mut vt;
-    let mut x;
-    let mut y;
-
-    //body
-    for i in 0..7000 {
-        vt = i as f64 / (40.0 * PI as f64);
-        x = (vt - 50.0) * sin(vt);
-        y = (vt + 50.0) *  cos(vt);
-        if i < 6500 || i > 6900 {
-            Text::with_alignment("'", Point::new((x + 220.0) as i32, (y + 200.0) as i32), default_style,  Alignment::Center)
-                .draw(&mut display)
-                .unwrap();
-        }
-        
-    }
+    //main body
+    body_part(&mut display, "'", [40.0, 50.0, 220.0, 200.0], 6400, -1, 1);
 
     //head
-    for i in 0..7000 {
-        vt = i as f64 / (60.0 * PI as f64);
-        x = (vt + 50.0) * cos(vt);
-        y = (vt -  50.0) * sin(vt);
-        
-        Text::with_alignment("'", Point::new((x + 220.0) as i32, (y + 60.0) as i32), default_style,  Alignment::Center)
-            .draw(&mut display)
-            .unwrap();
-
-    }
+    body_part(&mut display, "'", [60.0, 50.0, 220.0, 60.0], 6400, 1, -1);
 
     //eyes
-    for i in 0..1300 {
-        vt = i as f64 / (20.0 * PI as f64);
-        x = (vt - 15.0) * sin(vt);
-        y = (vt -  15.0) * cos(vt);
-        
-        Text::with_alignment("'", Point::new((x + 200.0) as i32, (y + 60.0) as i32), default_style,  Alignment::Center)
-            .draw(&mut display)
-            .unwrap();
-    }
-
-    for i in 0..1300 {
-        vt = i as f64 / (20.0 * PI as f64);
-        x = (vt - 15.0) * sin(vt);
-        y = (vt -  15.0) * cos(vt);
-        
-        Text::with_alignment("'", Point::new((x + 240.0) as i32, (y + 60.0) as i32), default_style,  Alignment::Center)
-            .draw(&mut display)
-            .unwrap();
-    }
+    body_part(&mut display, "'", [20.0, 15.0, 200.0, 60.0], 1300, -1, -1);
+    body_part(&mut display, "'", [20.0, 15.0, 240.0, 60.0], 1300, -1, -1);
 
     //hand
-
-    let mut b;
-    for a in (125..175).rev() {
-        b = a;
-        Text::with_alignment("-", Point::new(a, b), default_style,  Alignment::Center)
-            .draw(&mut display)
-            .unwrap();
-    }
+    hand(&mut display, 125, 175);
 
     //lollipop
-
-    for i in 0..3300 {
-        vt = i as f64 / (30.0 * PI as f64);
-        x = (vt - 30.0) * sin(vt);
-        y = (vt -  30.0) * cos(vt);
-        
-        Text::with_alignment("'", Point::new((x + 110.0) as i32, (y + 110.0) as i32), default_style,  Alignment::Center)
-            .draw(&mut display)
-            .unwrap();
-    }
-    
+    body_part(&mut display, "'", [30.0, 30.0, 110.0, 110.0], 3300, -1, -1);
     
     loop {}
 }
