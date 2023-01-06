@@ -195,3 +195,44 @@ pub fn print_squares<D>(display: &mut D, ch: &str, color: Rgb565, mut start_poin
         edge_y -= direction * 10;
     }
 }
+
+//lollipop guy functions
+
+pub fn body_part<D>(display: &mut D, ch:&str, modifiers: [f64; 4], len: i32, sign1: i32, sign2: i32)
+    where 
+        D:DrawTarget<Color = Rgb565>+Dimensions {
+    
+    let mut vt;
+    let mut x;
+    let mut y;
+            
+    for i in 0..len {
+        vt = i as f64 / (modifiers[0] * PI as f64);
+        x = (vt + (sign1 as f64 * modifiers[1])) * sin(vt);
+        y = (vt + (sign2 as f64 * modifiers[1])) *  cos(vt);
+        Text::with_alignment(ch, Point::new((x + modifiers[2]) as i32, (y + modifiers[3]) as i32), 
+        MonoTextStyleBuilder::new()
+            .font(&FONT_10X20)
+            .text_color(RgbColor::BLACK)
+            .build(), Alignment::Center)
+        .draw(display);
+    }
+}
+
+pub fn hand<D>(display: &mut D, x: i32, y: i32)
+    where 
+        D:DrawTarget<Color = Rgb565>+Dimensions {
+            
+    let mut b;
+    for a in (x..y).rev() {
+        b = a;
+        Text::with_alignment("-", Point::new(a, b), 
+        MonoTextStyleBuilder::new()
+            .font(&FONT_10X20)
+            .text_color(RgbColor::BLACK)
+            .build(), Alignment::Center)
+        .draw(display);
+    }
+}
+
+
