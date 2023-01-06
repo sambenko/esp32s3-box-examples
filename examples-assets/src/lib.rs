@@ -8,7 +8,7 @@ use core::f32::consts::PI;
 use libm::{sin, cos};
 
 use embedded_graphics::{
-    prelude::{RgbColor, Point, Primitive, Size, DrawTarget, Dimensions},
+    prelude::{RgbColor, Point, Primitive, Size, DrawTarget, Dimensions, PixelColor},
     image::Image,
     pixelcolor::Rgb565,
     mono_font::{
@@ -157,5 +157,41 @@ pub fn snowflake<D>(display: &mut D, x_value: i32, y_value: i32, size: u32)
     Circle::new(Point::new(x_value, y_value), size % 15 + 5)
         .into_styled(PrimitiveStyle::with_fill(RgbColor::WHITE))
         .draw(display);
+}
 
+//squares functions
+
+pub fn print_char<D>(display: &mut D, ch: &str, color: Rgb565, x: i32, y: i32)
+    where 
+        D:DrawTarget<Color = Rgb565>+Dimensions {
+            
+    Text::with_alignment(ch, Point::new(x, y), 
+        MonoTextStyleBuilder::new().font(&FONT_10X20).text_color(color).build(),  Alignment::Center)
+        .draw(display);
+}
+
+pub fn print_squares<D>(display: &mut D, ch: &str, color: Rgb565, mut start_point: i32, mut edge_x: i32, mut edge_y: i32, direction: i32, constraints: [i32; 3])
+    where 
+        D:DrawTarget<Color = Rgb565>+Dimensions {
+            
+    while start_point != constraints[0] && edge_x != constraints[1] && edge_y != constraints[2] {
+        for x in start_point..edge_x {
+            print_char(display, ch, color, x, start_point);
+        }
+    
+        for y in start_point..edge_y {
+            print_char(display, ch, color, edge_x, y);
+        }
+    
+        for x in (start_point..edge_x).rev() {
+            print_char(display, ch, color, x, edge_y);
+        }
+    
+        for y in (start_point..edge_y).rev() {
+            print_char(display, ch, color, start_point, y);
+        }
+        start_point += direction * 10;
+        edge_x -= direction * 10;
+        edge_y -= direction * 10;
+    }
 }
