@@ -4,39 +4,35 @@
 use display_interface_spi::SPIInterfaceNoCS;
 
 use embedded_graphics::{
-    prelude::RgbColor,
-    mono_font::{
-        ascii::FONT_10X20,
-        MonoTextStyleBuilder, MonoTextStyle,
-    },
-    prelude::Point,
-    text::{Alignment, Text},
-    Drawable,
+    prelude::{RgbColor, DrawTarget},
+    pixelcolor::Rgb565,
 };
 
 use esp32s3_hal::{
-    clock::ClockControl,
+    clock::{ClockControl, CpuClock},
     pac::Peripherals,
     prelude::*,
-    spi::{self, Spi},
+    spi,
     timer::TimerGroup,
     Rtc,
     IO,
     Delay,
 };
 
-use mipidsi::{DisplayOptions, Display, models::ILI9342CRgb565};
+use mipidsi::{ Orientation, ColorOrder };
 
 #[allow(unused_imports)]
 use esp_backtrace as _;
 
 use xtensa_lx_rt::entry;
 
+use examples_assets::{ print_squares };
+
 #[entry]
 fn main() -> ! {
     let peripherals = Peripherals::take().unwrap();
     let mut system = peripherals.SYSTEM.split();
-    let clocks = ClockControl::boot_defaults(system.clock_control).freeze();
+    let clocks = ClockControl::configure(system.clock_control, CpuClock::Clock240MHz).freeze();
 
     let mut rtc = Rtc::new(peripherals.RTC_CNTL);
     let timer_group0 = TimerGroup::new(peripherals.TIMG0, &clocks);
@@ -49,12 +45,13 @@ fn main() -> ! {
     wdt0.disable();
     wdt1.disable();
 
-    let mut delay = Delay::new(&clocks);
-
     let io = IO::new(peripherals.GPIO, peripherals.IO_MUX);
 
     let sclk = io.pins.gpio7;
     let mosi = io.pins.gpio6;
+    
+    let mut backlight = io.pins.gpio45.into_push_pull_output();
+    backlight.set_high().unwrap();
 
     let spi = spi::Spi::new_no_cs_no_miso(
         peripherals.SPI2,
@@ -66,92 +63,24 @@ fn main() -> ! {
         &clocks,
     );
 
-    let mut backlight = io.pins.gpio45.into_push_pull_output();
-    backlight.set_high().unwrap();
-
+    let di = SPIInterfaceNoCS::new(spi, io.pins.gpio4.into_push_pull_output());
     let reset = io.pins.gpio48.into_push_pull_output();
 
-    let di = SPIInterfaceNoCS::new(spi, io.pins.gpio4.into_push_pull_output());
+    let mut delay = Delay::new(&clocks);
 
-    let display_options = DisplayOptions {
-        orientation: mipidsi::Orientation::PortraitInverted(false),
-        ..Default::default()
-    };
+    let mut display = mipidsi::Builder::ili9342c_rgb565(di)
+        .with_orientation(Orientation::PortraitInverted(false))
+        .with_color_order(ColorOrder::Rgb)
+        .init(&mut delay, core::prelude::v1::Some(reset))
+    .unwrap();
 
-    let mut display = mipidsi::Display::ili9342c_rgb565(di, core::prelude::v1::Some(reset), display_options);
-    display.init(&mut delay).unwrap();
-
-    let default_style = MonoTextStyleBuilder::new()
-        .font(&FONT_10X20)
-        .text_color(RgbColor::BLACK)
-        .build();
-
-    let white_style = MonoTextStyleBuilder::new()
-        .font(&FONT_10X20)
-        .text_color(RgbColor::WHITE)
-        .build();
-
-    let mut start_point: i32 = 10;
-    let mut edge_x: i32 = 310;
-    let mut edge_y: i32 = 230;
+    display.clear(Rgb565::WHITE).unwrap();
 
     loop {
-        while start_point != 140 && edge_x != 140 && edge_y != 70 {
-            for x in start_point..edge_x {
-                Text::with_alignment("o", Point::new(x, start_point), default_style,  Alignment::Center)
-                    .draw(&mut display)
-                    .unwrap();
-            }
-        
-            for y in start_point..edge_y {
-                Text::with_alignment("o", Point::new(edge_x, y), default_style,  Alignment::Center)
-                    .draw(&mut display)
-                    .unwrap();
-            }
-        
-            for x in (start_point..edge_x).rev() {
-                Text::with_alignment("o", Point::new(x, edge_y), default_style,  Alignment::Center)
-                    .draw(&mut display)
-                    .unwrap();
-            }
-        
-            for y in (start_point..edge_y).rev() {
-                Text::with_alignment("o", Point::new(start_point, y), default_style,  Alignment::Center)
-                    .draw(&mut display)
-                    .unwrap();
-            }
-            start_point += 10;
-            edge_x -= 10;
-            edge_y -= 10;
-        }
-    
-        while start_point != 0 && edge_x != 320 && edge_y != 240 {
-            for x in start_point..edge_x {
-                Text::with_alignment("o", Point::new(x, start_point), white_style,  Alignment::Center)
-                    .draw(&mut display)
-                    .unwrap();
-            }
-        
-            for y in start_point..edge_y {
-                Text::with_alignment("o", Point::new(edge_x, y), white_style,  Alignment::Center)
-                    .draw(&mut display)
-                    .unwrap();
-            }
-        
-            for x in (start_point..edge_x).rev() {
-                Text::with_alignment("o", Point::new(x, edge_y), white_style,  Alignment::Center)
-                    .draw(&mut display)
-                    .unwrap();
-            }
-        
-            for y in (start_point..edge_y).rev() {
-                Text::with_alignment("o", Point::new(start_point, y), white_style,  Alignment::Center)
-                    .draw(&mut display)
-                    .unwrap();
-            }
-            start_point -= 5;
-            edge_x += 5;
-            edge_y += 5;
-        }
+        //prints black squares
+        print_squares(&mut display, "o", RgbColor::BLACK, 10, 310, 230, 1, [140, 140, 70]);
+
+        //white squares clear the board
+        print_squares(&mut display, "o", RgbColor::WHITE, 140, 180, 100, -1, [0, 320, 240]);
     }
 }
