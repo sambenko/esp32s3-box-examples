@@ -30,7 +30,7 @@ use xtensa_lx_rt::entry;
 
 use embedded_graphics_framebuf::FrameBuf;
 
-use examples_assets;
+use examples_assets::{ hat, logo, ferris, tree, gift, gifts, snowflake };
 
 #[entry]
 fn main() -> ! {
@@ -81,8 +81,6 @@ fn main() -> ! {
         .init(&mut delay, Some(reset))
         .unwrap();
 
-    display.clear(Rgb565::BLACK).unwrap();
-
     let mut data = [Rgb565::BLACK; 320 * 240];
     let mut fbuf = FrameBuf::new(&mut data, 320, 240);
     let mut rng = Rng::new(peripherals.RNG);
@@ -97,20 +95,20 @@ fn main() -> ! {
     let mut main_counter = 0;
 
     loop {
-        examples_assets::hat(&mut fbuf, 64.0, 20.0);
-        examples_assets::logo(&mut fbuf);
+        hat(&mut fbuf, 64.0, 20.0);
+        logo(&mut fbuf);
 
-        examples_assets::ferris(&mut fbuf);
-        examples_assets::hat(&mut fbuf, 166.0, 105.0);
+        ferris(&mut fbuf);
+        hat(&mut fbuf, 166.0, 105.0);
 
-        examples_assets::tree(&mut fbuf);
-        examples_assets::gift(&mut fbuf, 250, 215);
-        examples_assets::gifts(&mut fbuf, 290, 210);
+        tree(&mut fbuf);
+        gift(&mut fbuf, 250, 215);
+        gifts(&mut fbuf, 290, 210);
 
         for i in 0..10 {
 
             if main_counter > offsets[i] {
-                examples_assets::snowflake(&mut fbuf, x_values[i] as i32, y_values[i], sizes[i] as u32);
+                snowflake(&mut fbuf, x_values[i] as i32, y_values[i], sizes[i] as u32);
                 y_values[i] += 5;
             }
 
