@@ -26,7 +26,7 @@ use esp_backtrace as _;
 
 use xtensa_lx_rt::entry;
 
-use examples_assets::{ print_squares };
+use examples_assets::print_squares;
 
 #[entry]
 fn main() -> ! {
