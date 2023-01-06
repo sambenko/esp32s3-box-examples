@@ -26,7 +26,7 @@ use esp32s3_hal::{
 
 use esp_println::println;
 
-use mipidsi;
+use mipidsi::{ Orientation, ColorOrder };
 
 #[allow(unused_imports)]
 use esp_backtrace as _;
@@ -74,8 +74,8 @@ fn main() -> ! {
     let mut delay = Delay::new(&clocks);
 
     let mut display = mipidsi::Builder::ili9342c_rgb565(di)
-        .with_orientation(mipidsi::Orientation::PortraitInverted(false))
-        .with_color_order(mipidsi::ColorOrder::Rgb)
+        .with_orientation(Orientation::PortraitInverted(false))
+        .with_color_order(ColorOrder::Rgb)
         .init(&mut delay, core::prelude::v1::Some(reset))
     .unwrap();
 

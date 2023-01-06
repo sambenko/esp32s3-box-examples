@@ -20,6 +20,8 @@ use embedded_graphics::{
     Drawable,
 };
 
+//rustmas functions
+
 pub fn ferris<D>(display: &mut D)
 where 
     D:DrawTarget<Color = Rgb565>+Dimensions {
