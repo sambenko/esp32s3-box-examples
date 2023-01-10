@@ -4,7 +4,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/sambenko/esp32s3-box-examples">
-    <img src="images/esp32s3box.png" alt="Logo" width="150" height="150">
+    <img src="images/ferris.gif" alt="Logo" width="150" height="150">
   </a>
 
 <h3 align="center">ESP32S3-BOX Examples</h3>
