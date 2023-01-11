@@ -80,22 +80,22 @@ fn main() -> ! {
     let mut data = [Rgb565::WHITE; 320 * 240];
     let mut fbuf = FrameBuf::new(&mut data, 320, 240);
 
-    flower(&mut fbuf, 6.0, 71.0, 60.0, 30.0, 361, 35.0, 180.0);
+    flower(&mut fbuf, 6.0, 71.0, 60.0, 30.0, 120, 35.0, 180.0);
     stem(&mut fbuf, 35, 180, 240);
 
-    flower(&mut fbuf, 7.0, 19.0, 300.0, 30.0, 800, 90.0, 140.0);
+    flower(&mut fbuf, 7.0, 19.0, 110.0, 30.0, 250, 90.0, 140.0);
     stem(&mut fbuf, 90, 140, 240);
 
-    flower(&mut fbuf, 2.0, 39.0, 150.0, 30.0, 500, 140.0, 190.0);
+    flower(&mut fbuf, 2.0, 39.0, 150.0, 30.0, 100, 140.0, 190.0);
     stem(&mut fbuf, 140, 190, 240);
 
-    flower(&mut fbuf, 8.0, 27.0, 230.0, 30.0, 1000, 243.0, 200.0);
-    stem(&mut fbuf, 243, 200, 240);
+    flower(&mut fbuf, 8.0, 27.0, 230.0, 30.0, 250, 243.0, 200.0);
+    stem(&mut fbuf, 238, 200, 240);
 
-    flower(&mut fbuf, 5.0, 97.0, 150.0, 30.0, 700, 290.0, 155.0);
+    flower(&mut fbuf, 5.0, 69.0, 125.0, 30.0, 200, 290.0, 155.0);
     stem(&mut fbuf, 290, 155, 240);
 
-    flower(&mut fbuf, 6.0, 71.0, 1200.0, 80.0, 2500, 200.0, 90.0);
+    flower(&mut fbuf, 6.0, 71.0, 1200.0, 80.0, 1900, 200.0, 90.0);
     stem(&mut fbuf, 200, 130, 240);
 
     display.draw_iter(fbuf.into_iter()).unwrap();
