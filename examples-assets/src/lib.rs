@@ -15,7 +15,7 @@ use embedded_graphics::{
         ascii::FONT_10X20,
         MonoTextStyleBuilder,
     },
-    primitives::{Triangle, Rectangle, Circle, RoundedRectangle, PrimitiveStyle}, 
+    primitives::{Triangle, Rectangle, Circle, RoundedRectangle, PrimitiveStyle, Line}, 
     text::{Alignment, Text},
     Drawable,
 };
@@ -234,5 +234,38 @@ pub fn hand<D>(display: &mut D, x: i32, y: i32)
         .draw(display);
     }
 }
+
+//garden example functions
+
+pub fn flower<D>(display: &mut D, n: f64, d: f64, div: f64, mult: f64, count: i32, x_coord: f64, y_coord: f64)
+    where 
+        D:DrawTarget<Color = Rgb565>+Dimensions {
+    
+    let (mut a, mut r, mut x, mut y);
+    for t in 0..count {
+        a = t as f64 * d * (PI as f64 / div);
+        r = mult * sin(n * a);
+        x = r * cos(a);
+        y = r * sin(a);
+
+        Text::with_alignment("o", Point::new((x + x_coord) as i32, (y + y_coord) as i32), 
+            MonoTextStyleBuilder::new()
+            .font(&FONT_10X20)
+            .text_color(RgbColor::BLACK)
+            .build(),  
+            Alignment::Center)
+        .draw(display);
+    }
+}
+
+pub fn stem<D>(display: &mut D, sx: i32, sy: i32, ey: i32)
+    where 
+        D:DrawTarget<Color = Rgb565>+Dimensions {
+
+    Line::new(Point::new(sx, sy), Point::new(sx, ey))
+        .into_styled(PrimitiveStyle::with_stroke(Rgb565::BLACK, 2))
+        .draw(display);
+}
+
 
 
