@@ -4,15 +4,11 @@
 use display_interface_spi::SPIInterfaceNoCS;
 
 use embedded_graphics::{
-    prelude::RgbColor,
-    mono_font::{
-        ascii::FONT_10X20,
-        MonoTextStyleBuilder,
-    },
-    prelude::Point,
-    text::{Alignment, Text},
-    Drawable,
+    prelude::{ RgbColor, DrawTarget },
+    pixelcolor::Rgb565,
 };
+
+use embedded_graphics_framebuf::FrameBuf;
 
 use esp32s3_hal::{
     clock::ClockControl,
@@ -25,10 +21,9 @@ use esp32s3_hal::{
     Delay,
 };
 
-use mipidsi::DisplayOptions;
+use mipidsi::{ Orientation, ColorOrder };
 
-use core::f32::consts::PI;
-use libm::{sin, cos};
+use examples_assets::{ flower, stem };
 
 #[allow(unused_imports)]
 use esp_backtrace as _;
@@ -76,137 +71,34 @@ fn main() -> ! {
 
     let di = SPIInterfaceNoCS::new(spi, io.pins.gpio4.into_push_pull_output());
 
-    let display_options = DisplayOptions {
-        orientation: mipidsi::Orientation::PortraitInverted(false),
-        ..Default::default()
-    };
+    let mut display = mipidsi::Builder::ili9342c_rgb565(di)
+        .with_orientation(Orientation::PortraitInverted(false))
+        .with_color_order(ColorOrder::Rgb)
+        .init(&mut delay, core::prelude::v1::Some(reset))
+    .unwrap();
 
-    let mut display = mipidsi::Display::ili9342c_rgb565(di, core::prelude::v1::Some(reset), display_options);
-    display.init(&mut delay).unwrap();
+    let mut data = [Rgb565::WHITE; 320 * 240];
+    let mut fbuf = FrameBuf::new(&mut data, 320, 240);
 
-    let default_style = MonoTextStyleBuilder::new()
-        .font(&FONT_10X20)
-        .text_color(RgbColor::BLACK)
-        .build();
+    flower(&mut fbuf, 6.0, 71.0, 60.0, 30.0, 361, 35.0, 180.0);
+    stem(&mut fbuf, 35, 180, 240);
 
-    let mut n = 6.0;
-    let mut d = 71.0;    
-    let mut a;
-    let mut r;
-    let mut x;
-    let mut y;
+    flower(&mut fbuf, 7.0, 19.0, 300.0, 30.0, 800, 90.0, 140.0);
+    stem(&mut fbuf, 90, 140, 240);
 
-    for t in 0..361 {
-        a = t as f64 * d * (PI as f64 / 60.0);
-        r = 30.0 * sin(n * a);
-        x = r * cos(a);
-        y = r * sin(a);
+    flower(&mut fbuf, 2.0, 39.0, 150.0, 30.0, 500, 140.0, 190.0);
+    stem(&mut fbuf, 140, 190, 240);
 
-        Text::with_alignment("o", Point::new((x + 35.0) as i32, (y + 180.0) as i32), default_style,  Alignment::Center)
-            .draw(&mut display)
-            .unwrap();
-    }
-    let pos_x = 1;
-    for pos_y in 0..60 {
-        Text::with_alignment("|", Point::new(pos_x + 34, pos_y + 180), default_style,  Alignment::Center)
-            .draw(&mut display)
-            .unwrap();
-    }
+    flower(&mut fbuf, 8.0, 27.0, 230.0, 30.0, 1000, 243.0, 200.0);
+    stem(&mut fbuf, 243, 200, 240);
 
-    n = 7.0;
-    d = 19.0;
-    for t in 0..700 {
-        a = t as f64 * d * (PI as f64 / 300.0);
-        r = 30.0 * sin(n * a);
-        x = r * cos(a);
-        y = r * sin(a);
+    flower(&mut fbuf, 5.0, 97.0, 150.0, 30.0, 700, 290.0, 155.0);
+    stem(&mut fbuf, 290, 155, 240);
 
-        Text::with_alignment("o", Point::new((x + 90.0) as i32, (y + 140.0) as i32), default_style,  Alignment::Center)
-            .draw(&mut display)
-            .unwrap();
-    }
+    flower(&mut fbuf, 6.0, 71.0, 1200.0, 80.0, 2500, 200.0, 90.0);
+    stem(&mut fbuf, 200, 130, 240);
 
-    for pos_y in 0..100 {
-        Text::with_alignment("|", Point::new(pos_x + 89, pos_y + 140), default_style,  Alignment::Center)
-            .draw(&mut display)
-            .unwrap();
-    }
-
-    n = 2.0;
-    d = 39.0;
-    for t in 0..500 {
-        a = t as f64 * d * (PI as f64 / 150.0);
-        r = 30.0 * sin(n * a);
-        x = r * cos(a);
-        y = r * sin(a);
-
-        Text::with_alignment("S", Point::new((x + 140.0) as i32, (y + 190.0) as i32), default_style,  Alignment::Center)
-            .draw(&mut display)
-            .unwrap();
-    }
-
-    for pos_y in 0..50 {
-        Text::with_alignment("|", Point::new(pos_x + 139, pos_y + 190), default_style,  Alignment::Center)
-            .draw(&mut display)
-            .unwrap();
-    }
-
-    n = 8.0;
-    d = 27.0;
-    for t in 0..1000 {
-        a = t as f64 * d * (PI as f64 / 230.0);
-        r = 30.0 * sin(n * a);
-        x = r * cos(a);
-        y = r * sin(a);
-
-        Text::with_alignment("o", Point::new((x + 243.0) as i32, (y + 200.0) as i32), default_style,  Alignment::Center)
-            .draw(&mut display)
-            .unwrap();
-    }
-    for pos_y in 0..85 {
-        Text::with_alignment("|", Point::new(pos_x + 242, pos_y + 200), default_style,  Alignment::Center)
-            .draw(&mut display)
-            .unwrap();
-    }
-
-    n = 5.0;
-    d = 97.0;
-    for t in 0..700 {
-        a = t as f64 * d * (PI as f64 / 150.0);
-        r = 30.0 * sin(n * a);
-        x = r * cos(a);
-        y = r * sin(a);
-
-        Text::with_alignment("o", Point::new((x + 290.0) as i32, (y + 155.0) as i32), default_style,  Alignment::Center)
-            .draw(&mut display)
-            .unwrap();
-    }
-    for pos_y in 0..85 {
-        Text::with_alignment("|", Point::new(pos_x + 289, pos_y + 155), default_style,  Alignment::Center)
-            .draw(&mut display)
-            .unwrap();
-    }
-
-    n = 6.0;
-    d = 71.0;
-    for t in 0..2500 {
-        a = t as f64 * d * (PI as f64 / 1200.0);
-        r = 80.0 * sin(n * a);
-        x = r * cos(a);
-        y = r * sin(a);
-
-        Text::with_alignment("o", Point::new((x + 200.0) as i32, (y + 90.0) as i32), default_style,  Alignment::Center)
-            .draw(&mut display)
-            .unwrap();
-    }
-
-    for pos_y in 0..100 {
-        Text::with_alignment("|", Point::new(pos_x + 199, pos_y + 140), default_style,  Alignment::Center)
-            .draw(&mut display)
-            .unwrap();
-    }
-
+    display.draw_iter(fbuf.into_iter()).unwrap();
     
-
     loop {}
 }
