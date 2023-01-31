@@ -129,7 +129,7 @@
 
 <div align="center">
   <a href="https://github.com/sambenko/esp32s3-box-examples">
-    <img src="images/rustmas.jpg" alt="Rustmas" width="400" height="400">
+    <img src="images/rustmas.gif" alt="Rustmas" width="400" height="400">
   </a>
 </div>
 
