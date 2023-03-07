@@ -4,7 +4,8 @@
 use display_interface_spi::SPIInterfaceNoCS;
 
 use embedded_graphics::{
-    prelude::{RgbColor, Point},
+    prelude::{RgbColor, Point, DrawTarget},
+    pixelcolor::Rgb565,
     mono_font::{
         ascii::FONT_10X20,
         MonoTextStyleBuilder,
@@ -15,7 +16,7 @@ use embedded_graphics::{
 
 use esp32s3_hal::{
     clock::{ClockControl, CpuClock},
-    pac::Peripherals,
+    peripherals::Peripherals,
     prelude::*,
     spi,
     timer::TimerGroup,
@@ -35,10 +36,9 @@ use xtensa_lx_rt::entry;
 
 #[entry]
 fn main() -> ! {
-    let peripherals = Peripherals::take().unwrap();
+    let peripherals = Peripherals::take();
     let mut system = peripherals.SYSTEM.split();
     let clocks = ClockControl::configure(system.clock_control, CpuClock::Clock240MHz).freeze();
-
     let mut rtc = Rtc::new(peripherals.RTC_CNTL);
     let timer_group0 = TimerGroup::new(peripherals.TIMG0, &clocks);
     let mut wdt0 = timer_group0.wdt;
@@ -46,7 +46,6 @@ fn main() -> ! {
     let mut wdt1 = timer_group1.wdt;
 
     rtc.rwdt.disable();
-
     wdt0.disable();
     wdt1.disable();
 
@@ -54,7 +53,6 @@ fn main() -> ! {
 
     let sclk = io.pins.gpio7;
     let mosi = io.pins.gpio6;
-    
     let mut backlight = io.pins.gpio45.into_push_pull_output();
     backlight.set_high().unwrap();
 
@@ -62,7 +60,7 @@ fn main() -> ! {
         peripherals.SPI2,
         sclk,
         mosi,
-        4u32.MHz(),
+        60u32.MHz(),
         spi::SpiMode::Mode0,
         &mut system.peripheral_clock_control,
         &clocks,
@@ -74,10 +72,13 @@ fn main() -> ! {
     let mut delay = Delay::new(&clocks);
 
     let mut display = mipidsi::Builder::ili9342c_rgb565(di)
+        .with_display_size(320, 240)
         .with_orientation(Orientation::PortraitInverted(false))
-        .with_color_order(ColorOrder::Rgb)
-        .init(&mut delay, core::prelude::v1::Some(reset))
-    .unwrap();
+        .with_color_order(ColorOrder::Bgr)
+        .init(&mut delay, Some(reset))
+        .unwrap();
+
+    display.clear(Rgb565::WHITE).unwrap();
 
     Text::with_alignment("HELLO WORLD!", Point::new(160, 120), MonoTextStyleBuilder::new().font(&FONT_10X20).text_color(RgbColor::BLACK).build(),  Alignment::Center)
         .draw(&mut display)

@@ -11,8 +11,8 @@ use embedded_graphics::{
 use embedded_graphics_framebuf::FrameBuf;
 
 use esp32s3_hal::{
-    clock::ClockControl,
-    pac::Peripherals,
+    clock::{ClockControl, CpuClock},
+    peripherals::Peripherals,
     prelude::*,
     spi,
     timer::TimerGroup,
@@ -32,10 +32,9 @@ use xtensa_lx_rt::entry;
 
 #[entry]
 fn main() -> ! {
-    let peripherals = Peripherals::take().unwrap();
+    let peripherals = Peripherals::take();
     let mut system = peripherals.SYSTEM.split();
-    let clocks = ClockControl::boot_defaults(system.clock_control).freeze();
-
+    let clocks = ClockControl::configure(system.clock_control, CpuClock::Clock240MHz).freeze();
     let mut rtc = Rtc::new(peripherals.RTC_CNTL);
     let timer_group0 = TimerGroup::new(peripherals.TIMG0, &clocks);
     let mut wdt0 = timer_group0.wdt;
@@ -43,39 +42,37 @@ fn main() -> ! {
     let mut wdt1 = timer_group1.wdt;
 
     rtc.rwdt.disable();
-
     wdt0.disable();
     wdt1.disable();
-
-    let mut delay = Delay::new(&clocks);
 
     let io = IO::new(peripherals.GPIO, peripherals.IO_MUX);
 
     let sclk = io.pins.gpio7;
     let mosi = io.pins.gpio6;
+    let mut backlight = io.pins.gpio45.into_push_pull_output();
+    backlight.set_high().unwrap();
 
     let spi = spi::Spi::new_no_cs_no_miso(
         peripherals.SPI2,
         sclk,
         mosi,
-        4u32.MHz(),
+        60u32.MHz(),
         spi::SpiMode::Mode0,
         &mut system.peripheral_clock_control,
         &clocks,
     );
 
-    let mut backlight = io.pins.gpio45.into_push_pull_output();
-    backlight.set_high().unwrap();
-
+    let di = SPIInterfaceNoCS::new(spi, io.pins.gpio4.into_push_pull_output());
     let reset = io.pins.gpio48.into_push_pull_output();
 
-    let di = SPIInterfaceNoCS::new(spi, io.pins.gpio4.into_push_pull_output());
+    let mut delay = Delay::new(&clocks);
 
     let mut display = mipidsi::Builder::ili9342c_rgb565(di)
+        .with_display_size(320, 240)
         .with_orientation(Orientation::PortraitInverted(false))
-        .with_color_order(ColorOrder::Rgb)
-        .init(&mut delay, core::prelude::v1::Some(reset))
-    .unwrap();
+        .with_color_order(ColorOrder::Bgr)
+        .init(&mut delay, Some(reset))
+        .unwrap();
 
     let mut data = [Rgb565::WHITE; 320 * 240];
     let mut fbuf = FrameBuf::new(&mut data, 320, 240);
@@ -90,7 +87,7 @@ fn main() -> ! {
     stem(&mut fbuf, 140, 190, 240);
 
     flower(&mut fbuf, 8.0, 27.0, 230.0, 30.0, 250, 243.0, 200.0);
-    stem(&mut fbuf, 238, 200, 240);
+    stem(&mut fbuf, 246, 200, 240);
 
     flower(&mut fbuf, 5.0, 69.0, 125.0, 30.0, 200, 290.0, 155.0);
     stem(&mut fbuf, 290, 155, 240);
