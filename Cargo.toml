@@ -6,13 +6,15 @@ edition = "2021"
 license = "MIT OR Apache-2.0"
 
 [dependencies]
-esp32s3-hal = "0.4.0"
+xtensa-atomic-emulation-trap = "0.4.0"
+esp32s3-hal = "0.7.0"
 esp-alloc = { version = "0.2.0", features = ["oom-handler"] }
 esp-backtrace = { version = "0.6.0", features = ["esp32s3", "panic-handler", "print-uart"] }
 xtensa-lx-rt = { version = "0.15.0", features = ["esp32s3"], optional = true }
 esp-println = { version = "0.4.0", features = [ "esp32s3" ] }
 embedded-graphics = "0.7"
-mipidsi = { git = "https://github.com/almindor/mipidsi" }
+mipidsi = "0.6.0"
+display-interface = "0.4"
 display-interface-spi = "0.4"
 embedded-graphics-framebuf = "0.2.0"
 
@@ -22,5 +24,4 @@ tinybmp = "0.4.0"
 examples-assets = { path = "./examples-assets"}
 
 [features]
-default = ["rt"]
-rt = ["xtensa-lx-rt"]
+default = ["xtensa-lx-rt", "esp32s3-hal/eh1"]
