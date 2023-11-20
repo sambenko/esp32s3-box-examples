@@ -1,8 +1,7 @@
 #![no_std]
 #![no_main]
 
-
-use display_interface_spi::SPIInterfaceNoCS;
+use spi_dma_displayinterface::spi_dma_displayinterface::SPIInterfaceNoCS;
 
 use embedded_graphics::{
     prelude::{RgbColor, DrawTarget},
@@ -11,9 +10,14 @@ use embedded_graphics::{
 
 use hal::{
     clock::{ClockControl, CpuClock},
+    dma::DmaPriority,
+    gdma::Gdma,
     peripherals::Peripherals,
     prelude::*,
-    spi::{master::Spi, SpiMode},
+    spi::{
+        master::{prelude::*, Spi}, 
+        SpiMode,
+    },
     IO,
     Rng,
     Delay,
@@ -37,19 +41,35 @@ fn main() -> ! {
 
     let sclk = io.pins.gpio7;
     let mosi = io.pins.gpio6;
+    let cs = io.pins.gpio5;
+    let miso = io.pins.gpio2;
 
     let dc = io.pins.gpio4.into_push_pull_output();
     let mut backlight = io.pins.gpio45.into_push_pull_output();
     let reset = io.pins.gpio48.into_push_pull_output();
 
-    let spi = Spi::new_no_cs_no_miso(
+    let dma = Gdma::new(peripherals.DMA);
+    let dma_channel = dma.channel0;
+    
+    let mut descriptors = [0u32; 8 * 3];
+    let mut rx_descriptors = [0u32; 8 * 3];
+
+    let spi = Spi::new(
         peripherals.SPI2,
         sclk,
         mosi,
+        miso,
+        cs,
         60u32.MHz(),
         SpiMode::Mode0,
         &clocks,
-    );
+    )
+    .with_dma(dma_channel.configure(
+        false,
+        &mut descriptors,
+        &mut rx_descriptors,
+        DmaPriority::Priority0,
+    ));
 
     let di = SPIInterfaceNoCS::new(spi, dc);
     delay.delay_ms(500u32);
@@ -107,7 +127,8 @@ fn main() -> ! {
             }
         }
 
-        display.draw_iter(fbuf.into_iter()).unwrap();
+        let pixel_iterator = fbuf.into_iter().map(|p| p.1);
+        let _ = display.set_pixels(0, 0, 319, 240, pixel_iterator);
 
         #[allow(unused_must_use)] {
             fbuf.clear(Rgb565::BLACK);
