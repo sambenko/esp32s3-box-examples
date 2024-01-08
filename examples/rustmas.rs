@@ -56,13 +56,14 @@ fn main() -> ! {
 
     let spi = Spi::new(
         peripherals.SPI2,
-        sclk,
-        mosi,
-        miso,
-        cs,
         60u32.MHz(),
         SpiMode::Mode0,
         &clocks,
+    ).with_pins(
+        Some(sclk),
+        Some(mosi),
+        Some(miso),
+        Some(cs),
     )
     .with_dma(dma_channel.configure(
         false,
