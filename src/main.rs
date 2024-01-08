@@ -39,18 +39,23 @@ fn main() -> ! {
 
     let sclk = io.pins.gpio7;
     let mosi = io.pins.gpio6;
+    let cs = io.pins.gpio5;
+    let miso = io.pins.gpio2;
 
     let dc = io.pins.gpio4.into_push_pull_output();
     let mut backlight = io.pins.gpio45.into_push_pull_output();
     let reset = io.pins.gpio48.into_push_pull_output();
 
-    let spi = Spi::new_no_cs_no_miso(
+    let spi = Spi::new(
         peripherals.SPI2,
-        sclk,
-        mosi,
         60u32.MHz(),
         SpiMode::Mode0,
         &clocks,
+    ).with_pins(
+        Some(sclk),
+        Some(mosi),
+        Some(miso),
+        Some(cs),
     );
 
     let di = SPIInterfaceNoCS::new(spi, dc);
