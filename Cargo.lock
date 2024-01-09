@@ -947,7 +947,7 @@ dependencies = [
 [[package]]
 name = "spi-dma-displayinterface"
 version = "0.3.0"
-source = "git+https://github.com/georgik/esp32-spooky-maze-game.git#087b99e89bda5759c54d6a0a0c04f9dc4e1a56d7"
+source = "git+https://github.com/georgik/esp32-spooky-maze-game.git#0c01e791da9a8c8465222e0ce7d6f054d719ec36"
 dependencies = [
  "byte-slice-cast",
  "display-interface",

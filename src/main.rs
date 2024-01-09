@@ -1,7 +1,7 @@
 #![no_std]
 #![no_main]
 
-use display_interface_spi::SPIInterfaceNoCS;
+use spi_dma_displayinterface::spi_dma_displayinterface;
 
 use embedded_graphics::{
     prelude::{RgbColor, Point, DrawTarget},
@@ -16,9 +16,14 @@ use embedded_graphics::{
 
 use hal::{
     clock::{ClockControl, CpuClock},
+    dma::DmaPriority,
+    gdma::Gdma,
     peripherals::Peripherals,
     prelude::*,
-    spi::{master::Spi, SpiMode},
+    spi::{
+        master::{prelude::*, Spi},  
+        SpiMode,
+    },
     IO,
     Delay,
 };
@@ -46,9 +51,15 @@ fn main() -> ! {
     let mut backlight = io.pins.gpio45.into_push_pull_output();
     let reset = io.pins.gpio48.into_push_pull_output();
 
+    let dma = Gdma::new(peripherals.DMA);
+    let dma_channel = dma.channel0;
+    
+    let mut descriptors = [0u32; 8 * 3];
+    let mut rx_descriptors = [0u32; 8 * 3];
+
     let spi = Spi::new(
         peripherals.SPI2,
-        60u32.MHz(),
+        40u32.MHz(),
         SpiMode::Mode0,
         &clocks,
     ).with_pins(
@@ -56,9 +67,15 @@ fn main() -> ! {
         Some(mosi),
         Some(miso),
         Some(cs),
-    );
+    ).with_dma(dma_channel.configure(
+        false,
+        &mut descriptors,
+        &mut rx_descriptors,
+        DmaPriority::Priority0,
+    ));
 
-    let di = SPIInterfaceNoCS::new(spi, dc);
+    // 320 x 240 resolution, 16 bits per pixel
+    let di = spi_dma_displayinterface::new_no_cs(320 * 240 * 2, spi, dc);
     delay.delay_ms(500u32);
     
     let mut display = match mipidsi::Builder::ili9342c_rgb565(di)
