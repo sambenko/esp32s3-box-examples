@@ -1,7 +1,8 @@
 #![no_std]
 #![no_main]
 
-use spi_dma_displayinterface::spi_dma_displayinterface;
+// use spi_dma_displayinterface::spi_dma_displayinterface;
+use display_interface_spi::SPIInterfaceNoCS;
 
 use embedded_graphics::{
     prelude::{RgbColor, Point, DrawTarget},
@@ -67,15 +68,11 @@ fn main() -> ! {
         Some(mosi),
         Some(miso),
         Some(cs),
-    ).with_dma(dma_channel.configure(
-        false,
-        &mut descriptors,
-        &mut rx_descriptors,
-        DmaPriority::Priority0,
-    ));
+    );
 
     // 320 x 240 resolution, 16 bits per pixel
-    let di = spi_dma_displayinterface::new_no_cs(320 * 240 * 2, spi, dc);
+    // let di = spi_dma_displayinterface::new_no_cs(320 * 240 * 2, spi, dc);
+    let di = SPIInterfaceNoCS::new(spi, dc);
     delay.delay_ms(500u32);
     
     let mut display = match mipidsi::Builder::ili9342c_rgb565(di)

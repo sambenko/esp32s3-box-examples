@@ -6,9 +6,7 @@ edition = "2021"
 license = "MIT OR Apache-2.0"
 
 [dependencies]
-xtensa-atomic-emulation-trap = "0.4.0"
-hal = { package = "esp32s3-hal", version = "0.14.0" }
-esp-alloc = "0.3.0"
+hal = { package = "esp32s3-hal", version = "0.15.0" }
 esp-backtrace = { version = "0.10.0", features = ["esp32s3", "panic-handler", "print-uart"] }
 esp-println = { version = "0.8.0", features = [ "esp32s3" ] }
 embedded-graphics = "0.8.1"
@@ -17,7 +15,7 @@ mipidsi = "0.7.1"
 display-interface = "0.4"
 display-interface-spi = "0.4"
 embedded-dma = "0.2.0"
-spi-dma-displayinterface = { git = "https://github.com/georgik/esp32-spooky-maze-game.git", package = "spi-dma-displayinterface", features = [ "esp32s3" ] }
+# spi-dma-displayinterface = { git = "https://github.com/georgik/esp32-spooky-maze-game.git", package = "spi-dma-displayinterface", features = [ "esp32s3" ] }
 
 #rustmas dependencies
 libm = "0.2.5"

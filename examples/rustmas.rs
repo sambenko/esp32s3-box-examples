@@ -1,10 +1,11 @@
 #![no_std]
 #![no_main]
 
-use spi_dma_displayinterface::spi_dma_displayinterface;
+// use spi_dma_displayinterface::spi_dma_displayinterface;
+use display_interface_spi::SPIInterfaceNoCS;
 
 use embedded_graphics::{
-    prelude::{RgbColor, DrawTarget},
+    prelude::{RgbColor, DrawTarget, Dimensions},
     pixelcolor::Rgb565,
 };
 
@@ -28,6 +29,26 @@ use esp_backtrace as _;
 use embedded_graphics_framebuf::FrameBuf;
 
 use examples_assets::{ hat, logo, ferris, tree, gift, gifts, snowflake };
+
+//number of snowflakes per set
+const SIZE: usize = 5;
+struct Coordinates([u8; SIZE], [i16; SIZE]);
+struct SnowflakeSet {
+    positions: Coordinates,
+    sizes: [u8; SIZE],
+}
+
+impl Default for SnowflakeSet {
+    fn default() -> SnowflakeSet {
+        SnowflakeSet {
+            positions: Coordinates([0; SIZE], [0; SIZE]),
+            sizes: [0; SIZE],
+        }
+    }
+}
+
+const NUM_SETS: usize = 4;
+const STAGGER_OFFSET: i16 = -50;
 
 #[entry]
 fn main() -> ! {
@@ -64,14 +85,16 @@ fn main() -> ! {
         Some(mosi),
         Some(miso),
         Some(cs),
-    ).with_dma(dma_channel.configure(
-        false,
-        &mut descriptors,
-        &mut rx_descriptors,
-        DmaPriority::Priority0,
-    ));
+    );
+    // ).with_dma(dma_channel.configure(
+    //     false,
+    //     &mut descriptors,
+    //     &mut rx_descriptors,
+    //     DmaPriority::Priority0,
+    // ));
 
-    let di = spi_dma_displayinterface::new_no_cs(320 * 240 * 2, spi, dc);
+    // let di = spi_dma_displayinterface::new_no_cs(320 * 240 * 2, spi, dc);
+    let di = SPIInterfaceNoCS::new(spi, dc);
     delay.delay_ms(500u32);
     
     let mut display = match mipidsi::Builder::ili9342c_rgb565(di)
@@ -91,19 +114,24 @@ fn main() -> ! {
 
     let mut data = [Rgb565::BLACK; 320 * 240];
     let mut fbuf = FrameBuf::new(&mut data, 320, 240);
-    let mut rng = Rng::new(peripherals.RNG);
-    let mut x_values = [0u8; 10];
-    let mut sizes = [0u8; 10];
-    let mut num_buffer = [0u8; 1];
 
-    rng.read(&mut x_values).unwrap();
-    rng.read(&mut sizes).unwrap();
-    let mut y_values = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-    let offsets = [0, 25, 50, 75, 100, 125, 150, 175, 200, 225];
-    let mut main_counter = 0;
+    let mut snowflake_sets: [SnowflakeSet; NUM_SETS] = Default::default();
+
+    let mut rng = Rng::new(peripherals.RNG);
+
+    //initial random values for all sets
+    for (i, set) in snowflake_sets.iter_mut().enumerate() {
+        rng.read(&mut set.positions.0).unwrap();
+        rng.read(&mut set.sizes).unwrap();
+        for y in &mut set.positions.1 {
+            *y = STAGGER_OFFSET * (i as i16); // Apply stagger offset based on set index
+        }
+    }
+    
+    let mut main_counter: u32 = 0;
 
     loop {
-        hat(&mut fbuf, 64.0, 20.0);
+        hat(&mut fbuf, 64.0, 20.0); 
         logo(&mut fbuf);
 
         ferris(&mut fbuf);
@@ -113,31 +141,38 @@ fn main() -> ! {
         gift(&mut fbuf, 250, 215);
         gifts(&mut fbuf, 290, 210);
 
-        for i in 0..10 {
-
-            if main_counter > offsets[i] {
-                snowflake(&mut fbuf, x_values[i] as i32, y_values[i], sizes[i] as u32);
-                y_values[i] += 5;
-            }
-
-            if y_values[i] > 240 {
-                y_values[i] = 0;
-                rng.read(&mut num_buffer).unwrap();
-                x_values[i] = num_buffer[0];
-            }
+        for set in snowflake_sets.iter_mut() {
+            update_snowflakes(&mut rng, &mut set.positions, &mut set.sizes, SIZE, main_counter, &mut fbuf);
         }
-
+    
         let pixel_iterator = fbuf.into_iter().map(|p| p.1);
         let _ = display.set_pixels(0, 0, 319, 240, pixel_iterator);
-
+    
         #[allow(unused_must_use)] {
             fbuf.clear(Rgb565::BLACK);
         }
+    
+        // Increment the main counter
+        main_counter = main_counter.wrapping_add(5);
+    }
+}
 
-        main_counter += 5;
+fn update_snowflakes<D>(rng: &mut Rng, snow_positions: &mut Coordinates, sizes: &mut [u8; SIZE], size: usize, main_counter: u32, fbuf: &mut D) 
+where D:DrawTarget<Color = Rgb565>+Dimensions {
+    for i in 0..size {
+        // Check if the snowflake should start moving or if it's already moving
+        if snow_positions.1[i] > 0 || main_counter % (50 * size as u32) >= 50 * i as u32 {
+            snow_positions.1[i] += 5; // Move the snowflake down
 
-        if main_counter == 50000 {
-            main_counter = 0;
+            // Draw the snowflake
+            snowflake(fbuf, snow_positions.0[i] as i32, snow_positions.1[i] as i32, sizes[i] as u32);
+        }
+
+        // Reset the snowflake if it reaches the bottom
+        if snow_positions.1[i] > 240 {
+            snow_positions.1[i] = 0; // Reset to top
+            rng.read(&mut snow_positions.0[i..i+1]).unwrap();
+            rng.read(&mut sizes[i..i+1]).unwrap();
         }
     }
 }
