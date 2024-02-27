@@ -1,8 +1,8 @@
 #![no_std]
 #![no_main]
+#![feature(type_alias_impl_trait)]
 
-// use spi_dma_displayinterface::spi_dma_displayinterface;
-use display_interface_spi::SPIInterfaceNoCS;
+use esp_display_interface_spi_dma::display_interface_spi_dma;
 
 use embedded_graphics::{
     prelude::{RgbColor, Point, DrawTarget},
@@ -29,8 +29,12 @@ use hal::{
     Delay,
 };
 
-use esp_println::println;
+use esp_bsp::lcd_gpios;
+use esp_bsp::BoardType;
+use esp_bsp::DisplayConfig;
 
+use esp_println::println;
+use static_cell::make_static;
 use esp_backtrace as _;
 
 #[entry]
@@ -43,20 +47,13 @@ fn main() -> ! {
 
     let io = IO::new(peripherals.GPIO, peripherals.IO_MUX);
 
-    let sclk = io.pins.gpio7;
-    let mosi = io.pins.gpio6;
-    let cs = io.pins.gpio5;
-    let miso = io.pins.gpio2;
-
-    let dc = io.pins.gpio4.into_push_pull_output();
-    let mut backlight = io.pins.gpio45.into_push_pull_output();
-    let reset = io.pins.gpio48.into_push_pull_output();
-
     let dma = Gdma::new(peripherals.DMA);
     let dma_channel = dma.channel0;
     
-    let mut descriptors = [0u32; 8 * 3];
-    let mut rx_descriptors = [0u32; 8 * 3];
+    let descriptors = make_static!([0u32; 8 * 3]);
+    let rx_descriptors = make_static!([0u32; 8 * 3]);
+
+    let (lcd_sclk, lcd_mosi, lcd_cs, lcd_miso, lcd_dc, mut lcd_backlight, lcd_reset) = lcd_gpios!(BoardType::ESP32S3Box, io);
 
     let spi = Spi::new(
         peripherals.SPI2,
@@ -64,29 +61,32 @@ fn main() -> ! {
         SpiMode::Mode0,
         &clocks,
     ).with_pins(
-        Some(sclk),
-        Some(mosi),
-        Some(miso),
-        Some(cs),
-    );
+        Some(lcd_sclk),
+        Some(lcd_mosi),
+        Some(lcd_miso),
+        Some(lcd_cs),
+    ).with_dma(dma_channel.configure(
+        false,
+        &mut *descriptors,
+        &mut *rx_descriptors,
+        DmaPriority::Priority0,
+    ));
 
-    // 320 x 240 resolution, 16 bits per pixel
-    // let di = spi_dma_displayinterface::new_no_cs(320 * 240 * 2, spi, dc);
-    let di = SPIInterfaceNoCS::new(spi, dc);
-    delay.delay_ms(500u32);
+    let di = display_interface_spi_dma::new_no_cs(2 * 256 * 192, spi, lcd_dc);
     
+    let display_config = DisplayConfig::for_board(BoardType::ESP32S3Box);
     let mut display = match mipidsi::Builder::ili9342c_rgb565(di)
-        .with_display_size(320, 240)
+        .with_display_size(display_config.h_res, display_config.v_res)
         .with_orientation(mipidsi::Orientation::PortraitInverted(false))
         .with_color_order(mipidsi::ColorOrder::Bgr)
-        .init(&mut delay, Some(reset)) {
+        .init(&mut delay, Some(lcd_reset)) {
         Ok(display) => display,
         Err(_) => {
             panic!("Display initialization failed");
         }
     };
 
-    backlight.set_high().unwrap();
+    lcd_backlight.set_high().unwrap();
 
     display.clear(Rgb565::WHITE).unwrap();
 
