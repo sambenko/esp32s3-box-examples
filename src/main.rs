@@ -21,21 +21,23 @@ use hal::{
     gdma::Gdma,
     peripherals::Peripherals,
     prelude::*,
+    gpio::{GpioPin, Output},
     spi::{
         master::{prelude::*, Spi},  
         SpiMode,
+        FullDuplexMode,
     },
     IO,
     Delay,
 };
 
-use esp_bsp::lcd_gpios;
-use esp_bsp::BoardType;
-use esp_bsp::DisplayConfig;
+use esp_bsp::{lcd_gpios, BoardType, DisplayConfig, define_display_type};
 
 use esp_println::println;
 use static_cell::make_static;
 use esp_backtrace as _;
+
+type BoardDisplay = define_display_type!(BoardType::ESP32S3Box);
 
 #[entry]
 fn main() -> ! {
@@ -73,9 +75,8 @@ fn main() -> ! {
     ));
 
     let di = display_interface_spi_dma::new_no_cs(2 * 256 * 192, spi, lcd_dc);
-    
     let display_config = DisplayConfig::for_board(BoardType::ESP32S3Box);
-    let mut display = match mipidsi::Builder::ili9342c_rgb565(di)
+    let mut display: BoardDisplay = match mipidsi::Builder::ili9342c_rgb565(di)
         .with_display_size(display_config.h_res, display_config.v_res)
         .with_orientation(mipidsi::Orientation::PortraitInverted(false))
         .with_color_order(mipidsi::ColorOrder::Bgr)
